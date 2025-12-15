@@ -98,7 +98,10 @@ const Graph: React.FC<GraphProps> = ({
       viewMode,
       showPosters,
       posterScale,
-      lineOpacity
+      lineOpacity,
+      dataKeys: Object.keys(data),
+      hasNodes: Boolean(data.nodes),
+      hasLinks: Boolean(data.links)
     });
   }, [data, viewMode, showPosters, posterScale, lineOpacity]);
 
