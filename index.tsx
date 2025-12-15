@@ -187,22 +187,22 @@ const ControlPanel = ({
                             <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 border-b border-red-900/30 pb-1">Scenarios</h3>
                             <div className="space-y-2 font-mono text-xs">
                                 <button onClick={() => applyPreset('all')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    > Show Full Network
+                                    Show Full Network
                                 </button>
                                 <button onClick={() => applyPreset('kb-influences')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    > Origins of Kill Bill
+                                    Origins of Kill Bill
                                 </button>
                                 <button onClick={() => applyPreset('anime')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    > Anime Influences
+                                    Anime Influences
                                 </button>
                                 <button onClick={() => applyPreset('western')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    > Westerns
+                                    Westerns
                                 </button>
                                 <button onClick={() => applyPreset('femme')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    > Femme Fatale
+                                    Femme Fatale
                                 </button>
                                  <button onClick={() => applyPreset('crime')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    > Crime & Noir
+                                    Crime & Noir
                                 </button>
                             </div>
                         </div>
