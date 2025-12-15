@@ -220,22 +220,36 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
   // Load poster using the dynamic poster loader
   const loadPosterAsync = async () => {
     try {
-      const posterUrl = await posterLoader.getPosterUrl(node.id, node.name, node.year);
-      if (posterUrl && posterUrl !== node.posterUrl) {
+      // First, try to use the poster URL from node data if available
+      let posterUrl = node.posterUrl;
+
+      // If no poster URL in node data, try to get one from the loader
+      if (!posterUrl) {
+        posterUrl = await posterLoader.getPosterUrl(node.id, node.name, node.year);
+      }
+
+      if (posterUrl) {
         const loader = new THREE.TextureLoader();
         loader.setCrossOrigin('anonymous');
         loader.load(
           posterUrl,
           (loadedTex) => {
             loadedTex.colorSpace = THREE.SRGBColorSpace;
+            // Dispose of old texture to prevent memory leaks
+            if (contentMaterial.map && contentMaterial.map !== placeholderTexture) {
+              contentMaterial.map.dispose();
+            }
             contentMaterial.map = loadedTex;
             contentMaterial.needsUpdate = true;
+            console.log(`Successfully loaded poster for ${node.name}:`, posterUrl);
           },
           undefined,
           (error) => {
-            console.warn(`Failed to load poster texture for ${node.name}:`, error);
+            console.warn(`Failed to load poster texture for ${node.name}:`, error, posterUrl);
           }
         );
+      } else {
+        console.log(`No poster URL available for ${node.name}`);
       }
     } catch (error) {
       console.warn(`Failed to get poster URL for ${node.name}:`, error);

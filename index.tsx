@@ -439,17 +439,27 @@ const ControlPanel = ({
                         {/* Adjustments */}
                         <div>
                             <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 border-b border-red-900/30 pb-1">Adjustments</h3>
-                            
+
+                            {/* Reset Camera Button */}
+                            <div className="mb-4">
+                                <button
+                                    onClick={onResetCamera}
+                                    className="w-full py-2 px-3 bg-yellow-400 hover:bg-yellow-300 text-black text-xs font-bold uppercase tracking-wider transition-colors"
+                                >
+                                    Reset Camera
+                                </button>
+                            </div>
+
                             <div className="mb-4">
                                 <label className="flex justify-between text-[10px] font-bold text-gray-400 uppercase mb-1">
                                     <span>Poster Size</span>
                                     <span>{(posterScale * 100).toFixed(0)}%</span>
                                 </label>
-                                <input 
-                                    type="range" 
-                                    min="0.5" 
-                                    max="2.0" 
-                                    step="0.1" 
+                                <input
+                                    type="range"
+                                    min="0.5"
+                                    max="2.0"
+                                    step="0.1"
                                     value={posterScale}
                                     onChange={(e) => setPosterScale(parseFloat(e.target.value))}
                                     className="w-full accent-yellow-400 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
@@ -461,11 +471,11 @@ const ControlPanel = ({
                                     <span>Line Visibility</span>
                                     <span>{(lineOpacity * 100).toFixed(0)}%</span>
                                 </label>
-                                <input 
-                                    type="range" 
-                                    min="0.05" 
-                                    max="1.0" 
-                                    step="0.05" 
+                                <input
+                                    type="range"
+                                    min="0.05"
+                                    max="1.0"
+                                    step="0.05"
                                     value={lineOpacity}
                                     onChange={(e) => setLineOpacity(parseFloat(e.target.value))}
                                     className="w-full accent-yellow-400 h-1 bg-gray-700 rounded-lg appearance-none cursor-pointer"
