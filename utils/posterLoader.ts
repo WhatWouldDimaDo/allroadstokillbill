@@ -61,10 +61,9 @@ class PosterLoader {
   }
 
   private async loadPoster(filmId: string, title: string, year: number): Promise<string> {
-    // First, try to load from local posters directory
-    const localPosterUrl = this.getLocalPosterUrl(filmId, title);
-    if (localPosterUrl) {
-      // Check if local poster exists by trying to load it
+    // First, try to load from local posters in public directory
+    const possibleUrls = this.getLocalPosterUrls(filmId, title);
+    for (const localPosterUrl of possibleUrls) {
       try {
         const response = await fetch(localPosterUrl);
         if (response.ok) {
@@ -72,10 +71,11 @@ class PosterLoader {
           return localPosterUrl;
         }
       } catch (error) {
-        // Local poster doesn't exist, continue to TMDB
-        console.log(`Local poster not found for ${title}, trying TMDB...`);
+        // Continue to next possible URL
       }
     }
+
+    console.log(`No local poster found for ${title}, trying TMDB...`);
 
     // Fallback to TMDB API
     if (!this.apiKey) {
@@ -159,18 +159,19 @@ class PosterLoader {
     return canvas.toDataURL('image/png');
   }
 
-  private getLocalPosterUrl(filmId: string, title: string): string | null {
-    // Try to find poster in local posters directory
+  private getLocalPosterUrls(filmId: string, title: string): string[] {
+    // Try to find poster in public directory
     // Convert film ID to potential filename formats
     const possibleNames = [
       `${filmId}.jpg`,
+      `${filmId.replace(/-/g, '_')}.jpg`, // Convert hyphens to underscores
       `${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}.jpg`,
-      `${title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-')}.jpg`
+      `${title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-')}.jpg`,
+      `${title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}.jpg` // Underscore version
     ];
 
-    // For now, assume posters are available and return the path
-    // In a real implementation, you'd check if the file exists
-    return `/posters/${filmId}.jpg`;
+    // Posters are served from the public directory root
+    return possibleNames.map(name => `/${name}`);
   }
 
   private loadCacheFromStorage(): void {
