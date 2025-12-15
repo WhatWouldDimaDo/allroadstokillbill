@@ -416,7 +416,15 @@ const Legend = ({ onHighlight, showLegend }: { onHighlight: (cat: string | null)
 
 const App = () => {
   const fgRef = useRef<any>(null);
-  
+
+  // Debug logging
+  useEffect(() => {
+    console.log('App component mounted');
+    console.log('Color palette:', COLOR_PALETTE);
+    console.log('Initial graph data nodes:', INITIAL_GRAPH_DATA.nodes.length);
+    console.log('Initial graph data links:', INITIAL_GRAPH_DATA.links.length);
+  }, []);
+
   // States
   const [filters, setFilters] = useState({
     subclouds: Object.keys(COLOR_PALETTE)

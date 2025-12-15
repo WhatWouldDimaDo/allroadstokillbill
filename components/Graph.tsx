@@ -31,12 +31,12 @@ const SUBCLOUD_CLUSTERS: Record<string, { x: number; y: number }> = {
   'foundation': { x: 0, y: -200 },
 };
 
-const Graph: React.FC<GraphProps> = ({ 
-  data, 
-  onNodeClick, 
-  graphRef, 
-  viewMode, 
-  showPosters, 
+const Graph: React.FC<GraphProps> = ({
+  data,
+  onNodeClick,
+  graphRef,
+  viewMode,
+  showPosters,
   highlightedCategory,
   selectedNode,
   neighbors,
@@ -44,11 +44,25 @@ const Graph: React.FC<GraphProps> = ({
   lineOpacity
 }) => {
 
+  // Debug logging
+  useEffect(() => {
+    console.log('Graph component mounted');
+    console.log('Graph data received:', {
+      nodes: data.nodes?.length || 0,
+      links: data.links?.length || 0,
+      viewMode,
+      showPosters,
+      posterScale,
+      lineOpacity
+    });
+  }, [data, viewMode, showPosters, posterScale, lineOpacity]);
+
   // Re-heat simulation when view mode changes
   useEffect(() => {
      if (graphRef.current) {
+         console.log('Re-heating simulation for view mode:', viewMode);
          graphRef.current.d3ReheatSimulation();
-         
+
          // Camera adjustments based on mode
          if (viewMode === '2d') {
             graphRef.current.cameraPosition({x: 0, y: 0, z: 700}, {x:0, y:0, z:0}, 1000);
