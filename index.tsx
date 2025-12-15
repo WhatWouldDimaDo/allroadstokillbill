@@ -1,5 +1,6 @@
 import React, { useRef, useState, useMemo, useCallback, useEffect, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
+import Fuse from 'fuse.js';
 import { INITIAL_GRAPH_DATA, COLOR_PALETTE } from "./graphData_final_with_posters";
 import { NodeData } from "./types";
 
@@ -149,9 +150,78 @@ const FilmDetailPanel = ({
   );
 };
 
+const SearchResults = ({
+  searchResults,
+  onSelectFilm,
+  onClose
+}: {
+  searchResults: NodeData[];
+  onSelectFilm: (film: NodeData) => void;
+  onClose: () => void;
+}) => {
+  if (searchResults.length === 0) return null;
+
+  return (
+    <div className="absolute top-20 left-4 right-4 md:left-84 md:right-4 bg-black/95 backdrop-blur-xl border border-yellow-500/50 rounded-xl shadow-2xl z-30 max-h-96 overflow-y-auto">
+      <div className="p-4 border-b border-yellow-500/30">
+        <div className="flex items-center justify-between">
+          <h3 className="text-yellow-400 font-bold text-lg">SEARCH RESULTS</h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white p-1"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p className="text-gray-400 text-sm mt-1">Found {searchResults.length} film{searchResults.length !== 1 ? 's' : ''}</p>
+      </div>
+
+      <div className="p-2 space-y-1">
+        {searchResults.slice(0, 10).map((film, index) => (
+          <button
+            key={film.id}
+            onClick={() => onSelectFilm(film)}
+            className="w-full text-left p-3 bg-gray-900 hover:bg-gray-800 rounded border border-gray-700 hover:border-yellow-400 transition-all group"
+          >
+            <div className="flex items-start gap-3">
+              {film.posterUrl && (
+                <img
+                  src={film.posterUrl}
+                  alt={film.name}
+                  className="w-12 h-16 object-cover rounded border border-gray-600 flex-shrink-0"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <h4 className="text-white font-bold text-sm leading-tight truncate group-hover:text-yellow-400 transition-colors">
+                  {film.name}
+                </h4>
+                <p className="text-gray-400 text-xs mt-1">
+                  {film.director || 'Unknown Director'} • {film.year}
+                </p>
+                {film.rating && (
+                  <p className="text-yellow-400 text-xs mt-1">
+                    ★ {film.rating.toFixed(1)}
+                  </p>
+                )}
+              </div>
+            </div>
+          </button>
+        ))}
+        {searchResults.length > 10 && (
+          <div className="text-center text-gray-500 text-sm py-2">
+            And {searchResults.length - 10} more results...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 // --- Components ---
 
-const ControlPanel = ({ 
+const ControlPanel = ({
     filters, 
     setFilters, 
     searchQuery, 
@@ -518,11 +588,45 @@ const ControlPanel = ({
   );
 };
 
+// --- Timeline Axis Component ---
+
+const TimelineAxis = ({ viewMode }: { viewMode: '3d' | '2d' | 'timeline' }) => {
+  if (viewMode !== 'timeline') return null;
+
+  const years = [1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
+
+  return (
+    <>
+      {/* Timeline Indicator Label */}
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 px-4 py-2 rounded border border-yellow-500/30 z-10 pointer-events-none">
+        <span className="text-yellow-500 font-bold">TIMELINE VIEW</span>
+        <span className="text-white/60 ml-2">Films arranged by release year →</span>
+      </div>
+
+      {/* Timeline Axis */}
+      <div className="fixed bottom-20 left-0 right-0 flex justify-center pointer-events-none z-10">
+        <div className="flex items-end gap-0" style={{ width: '80vw' }}>
+          {years.map((year, i) => (
+            <div
+              key={year}
+              className="flex-1 flex flex-col items-center"
+            >
+              <div className="h-4 w-px bg-yellow-500/50" />
+              <span className="text-yellow-500 text-sm font-bold mt-1">{year}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+};
+
 // --- Main App Component ---
 
 const App = () => {
   const [introComplete, setIntroComplete] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<NodeData[]>([]);
   const [viewMode, setViewMode] = useState<'3d' | '2d' | 'timeline'>('3d');
   const [showPosters, setShowPosters] = useState(true);
   const [showLegend, setShowLegend] = useState(true);
@@ -542,6 +646,21 @@ const App = () => {
   useEffect(() => {
     const timer = setTimeout(() => setIntroComplete(true), 100);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Initialize Fuse search
+  const fuse = useMemo(() => {
+    const options = {
+      keys: [
+        { name: 'name', weight: 0.4 },
+        { name: 'director', weight: 0.3 },
+        { name: 'year', weight: 0.2 },
+        { name: 'genres', weight: 0.1 }
+      ],
+      threshold: 0.3,
+      includeScore: true,
+    };
+    return new Fuse(INITIAL_GRAPH_DATA.nodes, options);
   }, []);
 
   // Filtered data based on current filters
@@ -583,9 +702,17 @@ const App = () => {
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    // Search functionality can be implemented later
-    console.log('Searching for:', searchQuery);
-  }, [searchQuery]);
+    if (searchQuery.trim()) {
+      const results = fuse.search(searchQuery.trim()).map(result => result.item);
+      setSearchResults(results);
+      // Highlight the first result if any found
+      if (results.length > 0) {
+        setSelectedNode(results[0]);
+      }
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery, fuse]);
 
   const applyPreset = useCallback((preset: string) => {
     switch (preset) {
@@ -765,6 +892,16 @@ const App = () => {
       <FilmDetailPanel
         node={selectedNode}
         onClose={() => setSelectedNode(null)}
+      />
+
+      {/* Search Results */}
+      <SearchResults
+        searchResults={searchResults}
+        onSelectFilm={(film) => {
+          setSelectedNode(film);
+          setSearchResults([]);
+        }}
+        onClose={() => setSearchResults([])}
       />
 
       {/* Control Panel */}

@@ -1,0 +1,68 @@
+{
+  "recommendations": [
+    {
+      "film": "Kill Bill Vol. 1",
+      "recommendations": [
+        {
+          "title": "Lady Snowblood",
+          "reason": "Direct inspiration for The Bride's character arc and final duel",
+          "confidence": 0.95
+        },
+        {
+          "title": "Shogun Assassin",
+          "reason": "Baby carriage scene and samurai revenge themes",
+          "confidence": 0.92
+        },
+        {
+          "title": "Game of Death",
+          "reason": "Hallway fight choreography and tournament structure",
+          "confidence": 0.88
+        }
+      ]
+    }
+  ],
+  "narratives": [
+    {
+      "film": "Pulp Fiction",
+      "generated_description": "A non-linear crime symphony where hitmen, boxers, and diner bandits dance through Tarantino's pop-culture obsessed Los Angeles. Each vignette builds toward revelations that subvert expectations while celebrating the beauty of human connection amidst chaos.",
+      "context": "influence_overview"
+    }
+  ],
+  "search_examples": [
+    {
+      "query": "films similar to Kill Bill but more recent",
+      "results": [
+        "Atomic Blonde",
+        "John Wick",
+        "Gunpowder Milkshake"
+      ],
+      "reasoning": "Female-led revenge stories with stylized action"
+    },
+    {
+      "query": "dark crime films from the 90s",
+      "results": [
+        "Reservoir Dogs",
+        "Pulp Fiction",
+        "Se7en"
+      ],
+      "reasoning": "Neo-noir crime films with complex narratives"
+    }
+  ],
+  "learning_paths": [
+    {
+      "goal": "tarantino_expert",
+      "films": [
+        "Reservoir Dogs",
+        "Pulp Fiction",
+        "Kill Bill Vol. 1",
+        "Kill Bill Vol. 2",
+        "Death Proof",
+        "Inglourious Basterds",
+        "Django Unchained",
+        "The Hateful Eight",
+        "Once Upon a Time in Hollywood"
+      ],
+      "description": "Complete journey through Tarantino's evolution as a filmmaker"
+    }
+  ]
+}

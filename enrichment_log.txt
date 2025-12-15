@@ -1,0 +1,817 @@
+============================================================
+🎬 TARANTINO GRAPH - MASTER ENRICHMENT SCRIPT
+============================================================
+TMDB API Key: ********************...
+Data file: /Users/dmitriyperkis/brain/allroadstokillbill/graphData_final_with_posters.ts
+Posters dir: /Users/dmitriyperkis/brain/allroadstokillbill/posters
+============================================================
+📦 Cache has 257 entries
+📖 Parsing dataset file...
+✅ Parsed 257 films from dataset
+
+🔄 Enriching 257 films via TMDB API...
+------------------------------------------------------------
+
+[1/257] A Fistful of Dollars (1964)
+  📦 [CACHED] A Fistful of Dollars (1964)
+
+[2/257] Anna (2019)
+  📦 [CACHED] Anna (2019)
+
+[3/257] Atomic Blonde (2017)
+  📦 [CACHED] Atomic Blonde (2017)
+
+[4/257] Birds of Prey (2020)
+  📦 [CACHED] Birds of Prey (2020)
+
+[5/257] Bitch Slap (2009)
+  📦 [CACHED] Bitch Slap (2009)
+
+[6/257] Black Mama White Mama (1972)
+  📦 [CACHED] Black Mama White Mama (1972)
+
+[7/257] Blacula (1972)
+  📦 [CACHED] Blacula (1972)
+
+[8/257] Cleopatra Jones (1973)
+  📦 [CACHED] Cleopatra Jones (1973)
+
+[9/257] Coffy (1973)
+  📦 [CACHED] Coffy (1973)
+
+[10/257] Crouching Tiger Hidden Dragon: Sword of Destiny (2016)
+  📦 [CACHED] Crouching Tiger Hidden Dragon: Sword of Destiny (2016)
+
+[11/257] Day of Anger (1969)
+  📦 [CACHED] Day of Anger (1969)
+
+[12/257] Dead Leaves (2004)
+  📦 [CACHED] Dead Leaves (2004)
+
+[13/257] Deadpool (2016)
+  📦 [CACHED] Deadpool (2016)
+
+[14/257] Death Rides a Horse (1967)
+  📦 [CACHED] Death Rides a Horse (1967)
+
+[15/257] Django (1966)
+  📦 [CACHED] Django (1966)
+
+[16/257] Enter the Dragon (1973)
+  📦 [CACHED] Enter the Dragon (1973)
+
+[17/257] Extraction (2020)
+  📦 [CACHED] Extraction (2020)
+
+[18/257] Faster (2010)
+  📦 [CACHED] Faster (2010)
+
+[19/257] Faster Pussycat Kill Kill (1965)
+  📦 [CACHED] Faster Pussycat Kill Kill (1965)
+
+[20/257] Female Prisoner Scorpion (1972)
+  📦 [CACHED] Female Prisoner Scorpion (1972)
+  💾 Cache saved (257 entries)
+
+[21/257] Fists of Fury (1972)
+  📦 [CACHED] Fists of Fury (1972)
+
+[22/257] For a Few Dollars More (1965)
+  📦 [CACHED] For a Few Dollars More (1965)
+
+[23/257] Foxy Brown (1974)
+  📦 [CACHED] Foxy Brown (1974)
+
+[24/257] Game of Death (1978)
+  📦 [CACHED] Game of Death (1978)
+
+[25/257] Ghost in the Shell (2017)
+  📦 [CACHED] Ghost in the Shell (2017)
+
+[26/257] Gilda (1946)
+  📦 [CACHED] Gilda (1946)
+
+[27/257] Gun Crazy (1950)
+  📦 [CACHED] Gun Crazy (1950)
+
+[28/257] Gunpowder Milkshake (2021)
+  📦 [CACHED] Gunpowder Milkshake (2021)
+
+[29/257] Harakiri (1962)
+  📦 [CACHED] Harakiri (1962)
+
+[30/257] Haywire (2011)
+  📦 [CACHED] Haywire (2011)
+
+[31/257] I Drink Your Blood (1970)
+  📦 [CACHED] I Drink Your Blood (1970)
+
+[32/257] Ichi the Killer (2001)
+  📦 [CACHED] Ichi the Killer (2001)
+
+[33/257] In a Lonely Place (1950)
+  📦 [CACHED] In a Lonely Place (1950)
+
+[34/257] John Wick (2014)
+  📦 [CACHED] John Wick (2014)
+
+[35/257] Johnny Guitar (1954)
+  📦 [CACHED] Johnny Guitar (1954)
+
+[36/257] Kate (2021)
+  📦 [CACHED] Kate (2021)
+
+[37/257] Kill Bill Vol. 1 (2003)
+  📦 [CACHED] Kill Bill Vol. 1 (2003)
+
+[38/257] Kill Bill Vol. 2 (2004)
+  📦 [CACHED] Kill Bill Vol. 2 (2004)
+
+[39/257] Kingsman (2015)
+  📦 [CACHED] Kingsman (2015)
+
+[40/257] Kiss Me Deadly (1955)
+  📦 [CACHED] Kiss Me Deadly (1955)
+  💾 Cache saved (257 entries)
+
+[41/257] Kung Fu Hustle (2004)
+  📦 [CACHED] Kung Fu Hustle (2004)
+
+[42/257] La Femme Nikita (1990)
+  📦 [CACHED] La Femme Nikita (1990)
+
+[43/257] Lady Snowblood (1973)
+  📦 [CACHED] Lady Snowblood (1973)
+
+[44/257] Lady Snowblood 2: Love Song of Vengeance (1974)
+  📦 [CACHED] Lady Snowblood 2: Love Song of Vengeance (1974)
+
+[45/257] Lady Vengeance (2005)
+  📦 [CACHED] Lady Vengeance (2005)
+
+[46/257] Lock Stock and Two Smoking Barrels (1998)
+  📦 [CACHED] Lock Stock and Two Smoking Barrels (1998)
+
+[47/257] Lone Wolf and Cub (1972)
+  📦 [CACHED] Lone Wolf and Cub (1972)
+
+[48/257] Machete (2010)
+  📦 [CACHED] Machete (2010)
+
+[49/257] Machete Kills (2013)
+  📦 [CACHED] Machete Kills (2013)
+
+[50/257] Massacre Time (1966)
+  📦 [CACHED] Massacre Time (1966)
+
+[51/257] Mission: Impossible - Fallout (2018)
+  📦 [CACHED] Mission: Impossible - Fallout (2018)
+
+[52/257] Mission: Impossible - Rogue Nation (2015)
+  📦 [CACHED] Mission: Impossible - Rogue Nation (2015)
+
+[53/257] Navajo Joe (1966)
+  📦 [CACHED] Navajo Joe (1966)
+
+[54/257] Oldboy (2003)
+  📦 [CACHED] Oldboy (2003)
+
+[55/257] Point Blank (1967)
+  📦 [CACHED] Point Blank (1967)
+
+[56/257] Ready Player One (2018)
+  📦 [CACHED] Ready Player One (2018)
+
+[57/257] Rebecca (2020)
+  📦 [CACHED] Rebecca (2020)
+
+[58/257] Red Sparrow (2018)
+  📦 [CACHED] Red Sparrow (2018)
+
+[59/257] Rio Bravo (1959)
+  📦 [CACHED] Rio Bravo (1959)
+
+[60/257] Samurai Rebellion (1967)
+  📦 [CACHED] Samurai Rebellion (1967)
+  💾 Cache saved (257 entries)
+
+[61/257] Sanjuro (1962)
+  📦 [CACHED] Sanjuro (1962)
+
+[62/257] Se7en (1995)
+  📦 [CACHED] Se7en (1995)
+
+[63/257] Seven Samurai (1954)
+  📦 [CACHED] Seven Samurai (1954)
+
+[64/257] Shaft (1971)
+  📦 [CACHED] Shaft (1971)
+
+[65/257] Shogun Assassin (1980)
+  📦 [CACHED] Shogun Assassin (1980)
+
+[66/257] Snatch (2000)
+  📦 [CACHED] Snatch (2000)
+
+[67/257] Spy Game (2005)
+  📦 [CACHED] Spy Game (2005)
+
+[68/257] Super Fly (1972)
+  📦 [CACHED] Super Fly (1972)
+
+[69/257] Supervixens (1975)
+  📦 [CACHED] Supervixens (1975)
+
+[70/257] Sweet Smell of Success (1957)
+  📦 [CACHED] Sweet Smell of Success (1957)
+
+[71/257] Sword of Destiny (2014)
+  📦 [CACHED] Sword of Destiny (2014)
+
+[72/257] Sword of Doom (1966)
+  📦 [CACHED] Sword of Doom (1966)
+
+[73/257] Tattooed Swordsman (1966)
+  ❌ Not found: Tattooed Swordsman (1966)
+
+[74/257] The 36th Chamber of Shaolin (1978)
+  📦 [CACHED] The 36th Chamber of Shaolin (1978)
+
+[75/257] The Ballad of Little Jo (1993)
+  📦 [CACHED] The Ballad of Little Jo (1993)
+
+[76/257] The Big Gundown (1966)
+  📦 [CACHED] The Big Gundown (1966)
+
+[77/257] The Chinese Connection (1972)
+  📦 [CACHED] The Chinese Connection (1972)
+
+[78/257] The Dark Knight (2008)
+  📦 [CACHED] The Dark Knight (2008)
+
+[79/257] The Good the Bad and the Ugly (1966)
+  📦 [CACHED] The Good the Bad and the Ugly (1966)
+
+[80/257] The Great Silence (1968)
+  📦 [CACHED] The Great Silence (1968)
+  💾 Cache saved (257 entries)
+
+[81/257] The Green Hornet (1966)
+  📦 [CACHED] The Green Hornet (1966)
+
+[82/257] The Killers (1946)
+  📦 [CACHED] The Killers (1946)
+
+[83/257] The Mack (1973)
+  📦 [CACHED] The Mack (1973)
+
+[84/257] The Man from Toronto (2022)
+  📦 [CACHED] The Man from Toronto (2022)
+
+[85/257] The Matrix (1999)
+  📦 [CACHED] The Matrix (1999)
+
+[86/257] The Old Guard (2020)
+  📦 [CACHED] The Old Guard (2020)
+
+[87/257] The Professional (1994)
+  📦 [CACHED] The Professional (1994)
+
+[88/257] The Tale of Zatoichi (1962)
+  📦 [CACHED] The Tale of Zatoichi (1962)
+
+[89/257] The Wild Bunch (1969)
+  📦 [CACHED] The Wild Bunch (1969)
+
+[90/257] Thriller: A Cruel Picture (1974)
+  📦 [CACHED] Thriller: A Cruel Picture (1974)
+
+[91/257] Truck Turner (1974)
+  📦 [CACHED] Truck Turner (1974)
+
+[92/257] Two Lane Blacktop (1971)
+  📦 [CACHED] Two Lane Blacktop (1971)
+
+[93/257] Venom (1981)
+  📦 [CACHED] Venom (1981)
+
+[94/257] Vixen! (1968)
+  📦 [CACHED] Vixen! (1968)
+
+[95/257] Wonder Woman (2017)
+  📦 [CACHED] Wonder Woman (2017)
+
+[96/257] Yojimbo (1961)
+  📦 [CACHED] Yojimbo (1961)
+
+[97/257] City on Fire (1987)
+  📦 [CACHED] City on Fire (1987)
+
+[98/257] Kansas City Confidential (1952)
+  📦 [CACHED] Kansas City Confidential (1952)
+
+[99/257] The Taking of Pelham One Two Three (1974)
+  📦 [CACHED] The Taking of Pelham One Two Three (1974)
+
+[100/257] The Killing (1956)
+  📦 [CACHED] The Killing (1956)
+  💾 Cache saved (257 entries)
+
+[101/257] Mean Streets (1973)
+  📦 [CACHED] Mean Streets (1973)
+
+[102/257] The Big Combo (1955)
+  📦 [CACHED] The Big Combo (1955)
+
+[103/257] A Better Tomorrow II (1987)
+  📦 [CACHED] A Better Tomorrow II (1987)
+
+[104/257] Black Sabbath (1963)
+  📦 [CACHED] Black Sabbath (1963)
+
+[105/257] Band of Outsiders (1964)
+  📦 [CACHED] Band of Outsiders (1964)
+
+[106/257] Blow Out (1981)
+  📦 [CACHED] Blow Out (1981)
+
+[107/257] Bonnie and Clyde (1967)
+  📦 [CACHED] Bonnie and Clyde (1967)
+
+[108/257] Repo Man (1984)
+  📦 [CACHED] Repo Man (1984)
+
+[109/257] Across 110th Street (1972)
+  📦 [CACHED] Across 110th Street (1972)
+
+[110/257] Vanishing Point (1971)
+  📦 [CACHED] Vanishing Point (1971)
+
+[111/257] Dirty Mary Crazy Larry (1974)
+  📦 [CACHED] Dirty Mary Crazy Larry (1974)
+
+[112/257] Gone in 60 Seconds (1974)
+  📦 [CACHED] Gone in 60 Seconds (1974)
+
+[113/257] The Dirty Dozen (1967)
+  📦 [CACHED] The Dirty Dozen (1967)
+
+[114/257] Where Eagles Dare (1968)
+  📦 [CACHED] Where Eagles Dare (1968)
+
+[115/257] The Inglorious Bastards (1978)
+  📦 [CACHED] The Inglorious Bastards (1978)
+
+[116/257] The Mercenary (1968)
+  📦 [CACHED] The Mercenary (1968)
+
+[117/257] Mandingo (1975)
+  📦 [CACHED] Mandingo (1975)
+
+[118/257] The Thing (1982)
+  📦 [CACHED] The Thing (1982)
+
+[119/257] Stagecoach (1939)
+  📦 [CACHED] Stagecoach (1939)
+
+[120/257] Le Samouraï (1967)
+  📦 [CACHED] Le Samouraï (1967)
+  💾 Cache saved (257 entries)
+
+[121/257] Bob le Flambeur (1956)
+  📦 [CACHED] Bob le Flambeur (1956)
+
+[122/257] Le Cercle Rouge (1970)
+  📦 [CACHED] Le Cercle Rouge (1970)
+
+[123/257] Breathless (1960)
+  📦 [CACHED] Breathless (1960)
+
+[124/257] The 400 Blows (1959)
+  📦 [CACHED] The 400 Blows (1959)
+
+[125/257] Pierrot le Fou (1965)
+  📦 [CACHED] Pierrot le Fou (1965)
+
+[126/257] Shoot the Piano Player (1960)
+  📦 [CACHED] Shoot the Piano Player (1960)
+
+[127/257] The Conformist (1970)
+  📦 [CACHED] The Conformist (1970)
+
+[128/257] The Battle of Algiers (1966)
+  📦 [CACHED] The Battle of Algiers (1966)
+
+[129/257] Army of Shadows (1969)
+  📦 [CACHED] Army of Shadows (1969)
+
+[130/257] Miller's Crossing (1990)
+  📦 [CACHED] Miller's Crossing (1990)
+
+[131/257] The Long Goodbye (1973)
+  📦 [CACHED] The Long Goodbye (1973)
+
+[132/257] Chinatown (1974)
+  📦 [CACHED] Chinatown (1974)
+
+[133/257] Night of the Hunter (1955)
+  📦 [CACHED] Night of the Hunter (1955)
+
+[134/257] Sorcerer (1977)
+  📦 [CACHED] Sorcerer (1977)
+
+[135/257] The French Connection (1971)
+  📦 [CACHED] The French Connection (1971)
+
+[136/257] Thief (1981)
+  📦 [CACHED] Thief (1981)
+
+[137/257] Heat (1995)
+  📦 [CACHED] Heat (1995)
+
+[138/257] Hard Boiled (1992)
+  📦 [CACHED] Hard Boiled (1992)
+
+[139/257] The Killer (1989)
+  📦 [CACHED] The Killer (1989)
+
+[140/257] A Better Tomorrow (1986)
+  📦 [CACHED] A Better Tomorrow (1986)
+  💾 Cache saved (257 entries)
+
+[141/257] Bullet in the Head (1990)
+  📦 [CACHED] Bullet in the Head (1990)
+
+[142/257] The Big Boss (1971)
+  📦 [CACHED] The Big Boss (1971)
+
+[143/257] Way of the Dragon (1972)
+  📦 [CACHED] Way of the Dragon (1972)
+
+[144/257] Master of the Flying Guillotine (1976)
+  📦 [CACHED] Master of the Flying Guillotine (1976)
+
+[145/257] Five Deadly Venoms (1978)
+  📦 [CACHED] Five Deadly Venoms (1978)
+
+[146/257] The 8 Diagram Pole Fighter (1984)
+  📦 [CACHED] The 8 Diagram Pole Fighter (1984)
+
+[147/257] Drunken Master (1978)
+  📦 [CACHED] Drunken Master (1978)
+
+[148/257] Snake in the Eagle's Shadow (1978)
+  📦 [CACHED] Snake in the Eagle's Shadow (1978)
+
+[149/257] Zu Warriors from the Magic Mountain (1983)
+  📦 [CACHED] Zu Warriors from the Magic Mountain (1983)
+
+[150/257] Once Upon a Time in China (1991)
+  📦 [CACHED] Once Upon a Time in China (1991)
+
+[151/257] Iron Monkey (1993)
+  📦 [CACHED] Iron Monkey (1993)
+
+[152/257] Executioners from Shaolin (1977)
+  📦 [CACHED] Executioners from Shaolin (1977)
+
+[153/257] Come Drink With Me (1966)
+  📦 [CACHED] Come Drink With Me (1966)
+
+[154/257] A Touch of Zen (1971)
+  📦 [CACHED] A Touch of Zen (1971)
+
+[155/257] Dragon Inn (1967)
+  📦 [CACHED] Dragon Inn (1967)
+
+[156/257] New Dragon Gate Inn (1992)
+  📦 [CACHED] New Dragon Gate Inn (1992)
+
+[157/257] Swordsman II (1992)
+  📦 [CACHED] Swordsman II (1992)
+
+[158/257] Heroic Trio (1993)
+  📦 [CACHED] Heroic Trio (1993)
+
+[159/257] The Bride with White Hair (1993)
+  📦 [CACHED] The Bride with White Hair (1993)
+
+[160/257] Police Story (1985)
+  📦 [CACHED] Police Story (1985)
+  💾 Cache saved (257 entries)
+
+[161/257] Project A (1983)
+  📦 [CACHED] Project A (1983)
+
+[162/257] The Magnificent Butcher (1979)
+  📦 [CACHED] The Magnificent Butcher (1979)
+
+[163/257] Yes, Madam (1985)
+  📦 [CACHED] Yes, Madam (1985)
+
+[164/257] Royal Warriors (1986)
+  📦 [CACHED] Royal Warriors (1986)
+
+[165/257] Companeros (1970)
+  📦 [CACHED] Companeros (1970)
+
+[166/257] A Professional Gun (1968)
+  📦 [CACHED] A Professional Gun (1968)
+
+[167/257] Minnesota Clay (1964)
+  📦 [CACHED] Minnesota Clay (1964)
+
+[168/257] Face to Face (1967)
+  📦 [CACHED] Face to Face (1967)
+
+[169/257] Keoma (1976)
+  📦 [CACHED] Keoma (1976)
+
+[170/257] Blindman (1971)
+  📦 [CACHED] Blindman (1971)
+
+[171/257] My Name is Nobody (1973)
+  📦 [CACHED] My Name is Nobody (1973)
+
+[172/257] Four of the Apocalypse (1975)
+  📦 [CACHED] Four of the Apocalypse (1975)
+
+[173/257] Cut-Throats Nine (1972)
+  📦 [CACHED] Cut-Throats Nine (1972)
+
+[174/257] The Shooting (1966)
+  📦 [CACHED] The Shooting (1966)
+
+[175/257] Ride in the Whirlwind (1966)
+  📦 [CACHED] Ride in the Whirlwind (1966)
+
+[176/257] Pat Garrett and Billy the Kid (1973)
+  📦 [CACHED] Pat Garrett and Billy the Kid (1973)
+
+[177/257] The Outlaw Josey Wales (1976)
+  📦 [CACHED] The Outlaw Josey Wales (1976)
+
+[178/257] Unforgiven (1992)
+  📦 [CACHED] Unforgiven (1992)
+
+[179/257] High Plains Drifter (1973)
+  📦 [CACHED] High Plains Drifter (1973)
+
+[180/257] High Noon (1952)
+  📦 [CACHED] High Noon (1952)
+  💾 Cache saved (257 entries)
+
+[181/257] The Searchers (1956)
+  📦 [CACHED] The Searchers (1956)
+
+[182/257] The Man Who Shot Liberty Valance (1962)
+  📦 [CACHED] The Man Who Shot Liberty Valance (1962)
+
+[183/257] Red River (1948)
+  📦 [CACHED] Red River (1948)
+
+[184/257] Winchester '73 (1950)
+  📦 [CACHED] Winchester '73 (1950)
+
+[185/257] The Naked Spur (1953)
+  📦 [CACHED] The Naked Spur (1953)
+
+[186/257] The Man from Laramie (1955)
+  📦 [CACHED] The Man from Laramie (1955)
+
+[187/257] Ride the High Country (1962)
+  📦 [CACHED] Ride the High Country (1962)
+
+[188/257] The Magnificent Seven (1960)
+  📦 [CACHED] The Magnificent Seven (1960)
+
+[189/257] El Topo (1970)
+  📦 [CACHED] El Topo (1970)
+
+[190/257] Dead Man (1995)
+  📦 [CACHED] Dead Man (1995)
+
+[191/257] The Proposition (2005)
+  📦 [CACHED] The Proposition (2005)
+
+[192/257] No Country for Old Men (2007)
+  📦 [CACHED] No Country for Old Men (2007)
+
+[193/257] True Grit (2010)
+  📦 [CACHED] True Grit (2010)
+
+[194/257] 3:10 to Yuma (2007)
+  📦 [CACHED] 3:10 to Yuma (2007)
+
+[195/257] The Assassination of Jesse James by the Coward Robert Ford (2007)
+  📦 [CACHED] The Assassination of Jesse James by the Coward Robert Ford (2007)
+
+[196/257] The Sisters Brothers (2018)
+  📦 [CACHED] The Sisters Brothers (2018)
+
+[197/257] Bone Tomahawk (2015)
+  📦 [CACHED] Bone Tomahawk (2015)
+
+[198/257] Hostiles (2017)
+  📦 [CACHED] Hostiles (2017)
+
+[199/257] The Harder They Fall (2021)
+  📦 [CACHED] The Harder They Fall (2021)
+
+[200/257] Rolling Thunder (1977)
+  📦 [CACHED] Rolling Thunder (1977)
+  💾 Cache saved (257 entries)
+
+[201/257] Ms. 45 (1981)
+  📦 [CACHED] Ms. 45 (1981)
+
+[202/257] I Spit on Your Grave (1978)
+  📦 [CACHED] I Spit on Your Grave (1978)
+
+[203/257] The Bride Wore Black (1968)
+  📦 [CACHED] The Bride Wore Black (1968)
+
+[204/257] Death Wish (1974)
+  📦 [CACHED] Death Wish (1974)
+
+[205/257] The Omega Man (1971)
+  📦 [CACHED] The Omega Man (1971)
+
+[206/257] The Cars That Ate Paris (1974)
+  📦 [CACHED] The Cars That Ate Paris (1974)
+
+[207/257] Mad Max (1979)
+  📦 [CACHED] Mad Max (1979)
+
+[208/257] The Road Warrior (1981)
+  📦 [CACHED] The Road Warrior (1981)
+
+[209/257] Race with the Devil (1975)
+  📦 [CACHED] Race with the Devil (1975)
+
+[210/257] White Line Fever (1975)
+  📦 [CACHED] White Line Fever (1975)
+
+[211/257] Duel (1971)
+  📦 [CACHED] Duel (1971)
+
+[212/257] The Sugarland Express (1974)
+  📦 [CACHED] The Sugarland Express (1974)
+
+[213/257] Smokey and the Bandit (1977)
+  📦 [CACHED] Smokey and the Bandit (1977)
+
+[214/257] The Great Texas Dynamite Chase (1976)
+  📦 [CACHED] The Great Texas Dynamite Chase (1976)
+
+[215/257] Convoy (1978)
+  📦 [CACHED] Convoy (1978)
+
+[216/257] The Driver (1978)
+  📦 [CACHED] The Driver (1978)
+
+[217/257] To Live and Die in L.A. (1985)
+  📦 [CACHED] To Live and Die in L.A. (1985)
+
+[218/257] Faster, Pussycat! Kill! Kill! (1965)
+  📦 [CACHED] Faster, Pussycat! Kill! Kill! (1965)
+
+[219/257] The Great Escape (1963)
+  📦 [CACHED] The Great Escape (1963)
+
+[220/257] The Guns of Navarone (1961)
+  📦 [CACHED] The Guns of Navarone (1961)
+  💾 Cache saved (257 entries)
+
+[221/257] Operation Amsterdam (1959)
+  📦 [CACHED] Operation Amsterdam (1959)
+
+[222/257] The Train (1964)
+  📦 [CACHED] The Train (1964)
+
+[223/257] Cross of Iron (1977)
+  📦 [CACHED] Cross of Iron (1977)
+
+[224/257] Patton (1970)
+  📦 [CACHED] Patton (1970)
+
+[225/257] The Longest Day (1962)
+  📦 [CACHED] The Longest Day (1962)
+
+[226/257] Kelly's Heroes (1970)
+  📦 [CACHED] Kelly's Heroes (1970)
+
+[227/257] The Devil's Brigade (1968)
+  📦 [CACHED] The Devil's Brigade (1968)
+
+[228/257] Natural Born Killers (1994)
+  📦 [CACHED] Natural Born Killers (1994)
+
+[229/257] True Romance (1993)
+  📦 [CACHED] True Romance (1993)
+
+[230/257] From Dusk Till Dawn (1996)
+  📦 [CACHED] From Dusk Till Dawn (1996)
+
+[231/257] Out of Sight (1998)
+  📦 [CACHED] Out of Sight (1998)
+
+[232/257] Get Shorty (1995)
+  📦 [CACHED] Get Shorty (1995)
+
+[233/257] Bound (1996)
+  📦 [CACHED] Bound (1996)
+
+[234/257] Go (1999)
+  📦 [CACHED] Go (1999)
+
+[235/257] Suicide Kings (1997)
+  📦 [CACHED] Suicide Kings (1997)
+
+[236/257] The Usual Suspects (1995)
+  📦 [CACHED] The Usual Suspects (1995)
+
+[237/257] Things to Do in Denver When You're Dead (1995)
+  📦 [CACHED] Things to Do in Denver When You're Dead (1995)
+
+[238/257] 2 Days in the Valley (1996)
+  📦 [CACHED] 2 Days in the Valley (1996)
+
+[239/257] Sexy Beast (2000)
+  📦 [CACHED] Sexy Beast (2000)
+
+[240/257] Layer Cake (2004)
+  📦 [CACHED] Layer Cake (2004)
+  💾 Cache saved (257 entries)
+
+[241/257] RocknRolla (2008)
+  📦 [CACHED] RocknRolla (2008)
+
+[242/257] In Bruges (2008)
+  📦 [CACHED] In Bruges (2008)
+
+[243/257] Seven Psychopaths (2012)
+  📦 [CACHED] Seven Psychopaths (2012)
+
+[244/257] The Boondock Saints (1999)
+  📦 [CACHED] The Boondock Saints (1999)
+
+[245/257] Smokin' Aces (2006)
+  📦 [CACHED] Smokin' Aces (2006)
+
+[246/257] Lucky Number Slevin (2006)
+  📦 [CACHED] Lucky Number Slevin (2006)
+
+[247/257] Kiss Kiss Bang Bang (2005)
+  📦 [CACHED] Kiss Kiss Bang Bang (2005)
+
+[248/257] The Nice Guys (2016)
+  📦 [CACHED] The Nice Guys (2016)
+
+[249/257] Baby Driver (2017)
+  📦 [CACHED] Baby Driver (2017)
+
+[250/257] Nightcrawler (2014)
+  📦 [CACHED] Nightcrawler (2014)
+
+[251/257] Drive (2011)
+  📦 [CACHED] Drive (2011)
+
+[252/257] Only God Forgives (2013)
+  📦 [CACHED] Only God Forgives (2013)
+
+[253/257] The Guest (2014)
+  📦 [CACHED] The Guest (2014)
+
+[254/257] Blue Ruin (2013)
+  📦 [CACHED] Blue Ruin (2013)
+
+[255/257] Green Room (2015)
+  📦 [CACHED] Green Room (2015)
+
+[256/257] Good Time (2017)
+  📦 [CACHED] Good Time (2017)
+
+[257/257] Uncut Gems (2019)
+  📦 [CACHED] Uncut Gems (2019)
+
+============================================================
+📝 Generating enriched TypeScript file...
+✅ Written to: /Users/dmitriyperkis/brain/allroadstokillbill/graphData_enriched.ts
+
+============================================================
+📊 ENRICHMENT SUMMARY
+============================================================
+Total films: 257
+✅ Enriched: 256
+🖼️  Posters downloaded: 256
+🎥 Trailers found: 247
+📦 Cache entries: 257
+============================================================
+
+📝 NEXT STEPS:
+1. Review graphData_enriched.ts
+2. If looks good, replace graphData_final_with_posters.ts
+3. Run: npm run build
+4. Commit and push to GitHub
+5. Vercel will auto-deploy
