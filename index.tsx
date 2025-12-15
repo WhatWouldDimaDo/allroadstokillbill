@@ -508,21 +508,32 @@ const App = () => {
     activeNodes = activeNodes.filter(n => n.year >= yearRange[0] && n.year <= yearRange[1]);
 
     // 3. Filter by Subclouds
-    activeNodes = activeNodes.filter(node => 
+    activeNodes = activeNodes.filter(node =>
       node.subclouds.some(sc => filters.subclouds.includes(sc))
     );
-    
+
     const activeNodeIds = new Set(activeNodes.map(n => n.id));
-    
+
     // 4. Filter links
     const activeLinks = INITIAL_GRAPH_DATA.links.filter(link => {
         const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
         const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
         return activeNodeIds.has(sourceId) && activeNodeIds.has(targetId);
     });
-    
+
     return { nodes: activeNodes, links: activeLinks };
   }, [filters, introYear, introComplete, yearRange]);
+
+  // Add a small delay before showing the graph to prevent Three.js initialization issues
+  const [graphReady, setGraphReady] = useState(false);
+  useEffect(() => {
+    if (introComplete && filteredData.nodes.length > 0) {
+      const timer = setTimeout(() => setGraphReady(true), 100);
+      return () => clearTimeout(timer);
+    } else {
+      setGraphReady(false);
+    }
+  }, [introComplete, filteredData.nodes.length]);
 
   // Determine neighbors for focus mode
   const neighbors = useMemo(() => {
@@ -602,9 +613,10 @@ const App = () => {
       )}
 
       {/* Graph Area */}
-      <Graph 
-        data={filteredData} 
-        onNodeClick={handleNodeClick} 
+      <Graph
+        key={introComplete ? 'graph-ready' : 'graph-loading'}
+        data={introComplete ? filteredData : { nodes: [], links: [] }}
+        onNodeClick={handleNodeClick}
         graphRef={fgRef}
         viewMode={viewMode}
         showPosters={showPosters}
