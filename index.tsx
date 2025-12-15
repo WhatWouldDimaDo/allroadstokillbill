@@ -593,29 +593,78 @@ const ControlPanel = ({
 const TimelineAxis = ({ viewMode }: { viewMode: '3d' | '2d' | 'timeline' }) => {
   if (viewMode !== 'timeline') return null;
 
-  const years = [1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020];
+  const years = [1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2025];
 
   return (
     <>
       {/* Timeline Indicator Label */}
-      <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/80 px-4 py-2 rounded border border-yellow-500/30 z-10 pointer-events-none">
-        <span className="text-yellow-500 font-bold">TIMELINE VIEW</span>
-        <span className="text-white/60 ml-2">Films arranged by release year →</span>
+      <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-black/90 px-6 py-3 rounded-lg border-2 border-yellow-500/50 z-20 pointer-events-none shadow-2xl">
+        <span className="text-yellow-500 font-black text-lg tracking-wider">TIMELINE VIEW</span>
+        <div className="text-white/80 text-sm mt-1 text-center">Films arranged chronologically by release year</div>
       </div>
 
-      {/* Timeline Axis */}
-      <div className="fixed bottom-20 left-0 right-0 flex justify-center pointer-events-none z-10">
-        <div className="flex items-end gap-0" style={{ width: '80vw' }}>
-          {years.map((year, i) => (
-            <div
-              key={year}
-              className="flex-1 flex flex-col items-center"
-            >
-              <div className="h-4 w-px bg-yellow-500/50" />
-              <span className="text-yellow-500 text-sm font-bold mt-1">{year}</span>
-            </div>
-          ))}
+      {/* Timeline Axis - Enhanced with more visual elements */}
+      <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-20">
+        <div className="bg-black/80 backdrop-blur-sm border border-yellow-500/30 rounded-lg p-4 shadow-2xl">
+          <div className="flex items-end gap-1" style={{ width: '85vw', maxWidth: '1200px' }}>
+            {years.map((year, i) => {
+              const decadeFilms = INITIAL_GRAPH_DATA.nodes.filter(node =>
+                node.year >= year && node.year < year + 10
+              ).length;
+
+              return (
+                <div
+                  key={year}
+                  className="flex-1 flex flex-col items-center group"
+                >
+                  {/* Main timeline bar */}
+                  <div className="h-6 w-1 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-t shadow-lg" />
+
+                  {/* Year label with film count */}
+                  <div className="mt-2 text-center">
+                    <span className="text-yellow-400 font-bold text-sm block group-hover:text-yellow-300 transition-colors">
+                      {year}
+                    </span>
+                    <span className="text-yellow-600/80 text-xs font-mono">
+                      {decadeFilms}
+                    </span>
+                  </div>
+
+                  {/* Decade separator line for non-last items */}
+                  {i < years.length - 1 && (
+                    <div className="absolute top-0 w-1 h-6 bg-yellow-500/20 translate-x-full -translate-y-6" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Legend */}
+          <div className="mt-3 text-center">
+            <span className="text-yellow-500/70 text-xs uppercase tracking-wider">
+              Year • Film Count
+            </span>
+          </div>
         </div>
+      </div>
+
+      {/* Floating year markers in 3D space */}
+      <div className="fixed inset-0 pointer-events-none z-10">
+        {years.map((year, i) => {
+          const xPos = (i / (years.length - 1)) * 100; // Percentage across screen
+          return (
+            <div
+              key={`marker-${year}`}
+              className="absolute bottom-32 text-yellow-500/30 font-bold text-xs"
+              style={{
+                left: `${10 + xPos * 0.8}%`,
+                transform: 'translateX(-50%)'
+              }}
+            >
+              {year}
+            </div>
+          );
+        })}
       </div>
     </>
   );
@@ -925,6 +974,9 @@ const App = () => {
         }}
         onClose={() => setSearchResults([])}
       />
+
+      {/* Timeline Axis */}
+      <TimelineAxis viewMode={viewMode} />
 
       {/* Control Panel */}
       <ControlPanel
