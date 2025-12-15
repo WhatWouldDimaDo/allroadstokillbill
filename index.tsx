@@ -217,7 +217,7 @@ const ScenesTab = ({ node }: { node: NodeData }) => {
   );
 };
 
-const InfluencesTab = ({ node }: { node: NodeData }) => (
+const InfluencesTab = ({ node, onNavigateToFilm }: { node: NodeData; onNavigateToFilm: (filmName: string) => void }) => (
   <div className="space-y-4">
     {/* Influenced By */}
     {node.influencedBy && node.influencedBy.length > 0 && (
@@ -227,7 +227,7 @@ const InfluencesTab = ({ node }: { node: NodeData }) => (
           {node.influencedBy.map((filmName, i) => {
             const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
             return (
-              <div key={i}>
+              <div key={i} onClick={() => onNavigateToFilm(filmName)} className="cursor-pointer">
                 <FilmRelationCard filmName={filmName} filmData={filmData} type="source" />
               </div>
             );
@@ -244,7 +244,7 @@ const InfluencesTab = ({ node }: { node: NodeData }) => (
           {node.influences.map((filmName, i) => {
             const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
             return (
-              <div key={i}>
+              <div key={i} onClick={() => onNavigateToFilm(filmName)} className="cursor-pointer">
                 <FilmRelationCard filmName={filmName} filmData={filmData} type="target" />
               </div>
             );
@@ -259,21 +259,23 @@ const InfluencesTab = ({ node }: { node: NodeData }) => (
         <h4 className="text-yellow-400 text-xs uppercase font-bold mb-3">Detailed Analysis</h4>
         <div className="space-y-3">
           {node.influenceMap.map((influence, i) => (
-            <div key={i} className="bg-gray-900/50 rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-white text-sm font-medium">{influence.targetFilm}</p>
-                <StrengthBadge strength={influence.strength} />
+            <div key={i} onClick={() => onNavigateToFilm(influence.targetFilm)} className="cursor-pointer">
+              <div className="bg-gray-900/50 rounded-lg p-3 hover:bg-gray-800/50 transition-colors">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-yellow-400 text-sm font-medium hover:text-yellow-300 transition-colors">{influence.targetFilm}</p>
+                  <StrengthBadge strength={influence.strength} />
+                </div>
+                {influence.evidence.length > 0 && (
+                  <ul className="space-y-1">
+                    {influence.evidence.map((item, idx) => (
+                      <li key={idx} className="text-gray-400 text-xs flex">
+                        <span className="text-yellow-400 mr-2">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              {influence.evidence.length > 0 && (
-                <ul className="space-y-1">
-                  {influence.evidence.map((item, idx) => (
-                    <li key={idx} className="text-gray-400 text-xs flex">
-                      <span className="text-yellow-400 mr-2">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
           ))}
         </div>
@@ -511,7 +513,11 @@ const InfluenceTypeBadge = ({ type }: { type: InfluenceType }) => {
   );
 };
 
-const FilmDetailPanel = ({ node, onClose }: { node: NodeData | null; onClose: () => void }) => {
+const FilmDetailPanel = ({ node, onClose, onNavigateToFilm }: {
+  node: NodeData | null;
+  onClose: () => void;
+  onNavigateToFilm: (filmName: string) => void;
+}) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'scenes' | 'influences' | 'cast'>('overview');
 
   if (!node) return null;
@@ -528,7 +534,7 @@ const FilmDetailPanel = ({ node, onClose }: { node: NodeData | null; onClose: ()
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === 'overview' && <OverviewTab node={node} />}
         {activeTab === 'scenes' && <ScenesTab node={node} />}
-        {activeTab === 'influences' && <InfluencesTab node={node} />}
+        {activeTab === 'influences' && <InfluencesTab node={node} onNavigateToFilm={onNavigateToFilm} />}
         {activeTab === 'cast' && <CastTab node={node} />}
       </div>
     </div>
@@ -1434,6 +1440,16 @@ const App = () => {
       <FilmDetailPanel
         node={selectedNode}
         onClose={() => setSelectedNode(null)}
+        onNavigateToFilm={(filmName: string) => {
+          // Close current card
+          setSelectedNode(null);
+          // Find and select the new film
+          const newFilm = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
+          if (newFilm) {
+            // Brief delay for animation
+            setTimeout(() => setSelectedNode(newFilm), 300);
+          }
+        }}
       />
 
       {/* Search Results */}
