@@ -128,19 +128,81 @@ const FilmDetailPanel = ({
           )}
         </div>
 
-        {/* Influence Info */}
+        {/* Navigation to Related Films */}
         {(node.influencedBy && node.influencedBy.length > 0) || (node.influences && node.influences.length > 0) ? (
-          <div className="pt-2 border-t border-gray-800 text-xs">
+          <div className="pt-2 border-t border-gray-800 space-y-3">
             {node.influencedBy && node.influencedBy.length > 0 && (
-              <div className="mb-2">
-                <span className="text-gray-500 uppercase text-[10px]">Influenced by: </span>
-                <span className="text-gray-300">{node.influencedBy.slice(0, 3).join(', ')}</span>
+              <div>
+                <span className="text-gray-500 uppercase text-[10px] mb-2 block">Influenced by:</span>
+                <div className="flex flex-wrap gap-1">
+                  {node.influencedBy.slice(0, 5).map((filmName, i) => {
+                    // Find the film data to get more info
+                    const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          if (filmData) {
+                            // Close current panel and select the new film
+                            onClose();
+                            setTimeout(() => {
+                              // Find and click the film in the graph
+                              const graph = document.querySelector('[data-force-graph-3d]') as any;
+                              if (graph && graph.__data && graph.__data.nodes) {
+                                const targetNode = graph.__data.nodes.find((n: any) => n.id === filmData.id);
+                                if (targetNode) {
+                                  // Simulate node click
+                                  const event = new CustomEvent('nodeClick', { detail: targetNode });
+                                  graph.dispatchEvent(event);
+                                }
+                              }
+                            }, 100);
+                          }
+                        }}
+                        className="px-2 py-1 bg-gray-800 hover:bg-yellow-400 hover:text-black text-gray-300 text-[9px] uppercase rounded transition-colors"
+                      >
+                        {filmName}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
             {node.influences && node.influences.length > 0 && (
               <div>
-                <span className="text-gray-500 uppercase text-[10px]">Influenced: </span>
-                <span className="text-gray-300">{node.influences.slice(0, 3).join(', ')}</span>
+                <span className="text-gray-500 uppercase text-[10px] mb-2 block">Influenced:</span>
+                <div className="flex flex-wrap gap-1">
+                  {node.influences.slice(0, 5).map((filmName, i) => {
+                    // Find the film data to get more info
+                    const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          if (filmData) {
+                            // Close current panel and select the new film
+                            onClose();
+                            setTimeout(() => {
+                              // Find and click the film in the graph
+                              const graph = document.querySelector('[data-force-graph-3d]') as any;
+                              if (graph && graph.__data && graph.__data.nodes) {
+                                const targetNode = graph.__data.nodes.find((n: any) => n.id === filmData.id);
+                                if (targetNode) {
+                                  // Simulate node click
+                                  const event = new CustomEvent('nodeClick', { detail: targetNode });
+                                  graph.dispatchEvent(event);
+                                }
+                              }
+                            }, 100);
+                          }
+                        }}
+                        className="px-2 py-1 bg-gray-800 hover:bg-yellow-400 hover:text-black text-gray-300 text-[9px] uppercase rounded transition-colors"
+                      >
+                        {filmName}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -1044,8 +1106,55 @@ const App = () => {
         onClose={() => setSearchResults([])}
       />
 
-      {/* Timeline Axis */}
-      <TimelineAxis viewMode={viewMode} />
+      {/* Timeline Axis - No banner */}
+      {viewMode === 'timeline' && (() => {
+        const years = [1940, 1950, 1960, 1970, 1980, 1990, 2000, 2010, 2020, 2025];
+        return (
+          <div className="fixed bottom-8 left-0 right-0 flex justify-center pointer-events-none z-20">
+            <div className="bg-black/80 backdrop-blur-sm border border-yellow-500/30 rounded-lg p-4 shadow-2xl">
+              <div className="flex items-end gap-1" style={{ width: '85vw', maxWidth: '1200px' }}>
+                {years.map((year, i) => {
+                  const decadeFilms = INITIAL_GRAPH_DATA.nodes.filter(node =>
+                    node.year >= year && node.year < year + 10
+                  ).length;
+
+                  return (
+                    <div
+                      key={year}
+                      className="flex-1 flex flex-col items-center group"
+                    >
+                      {/* Main timeline bar */}
+                      <div className="h-6 w-1 bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-t shadow-lg" />
+
+                      {/* Year label with film count */}
+                      <div className="mt-2 text-center">
+                        <span className="text-yellow-400 font-bold text-sm block group-hover:text-yellow-300 transition-colors">
+                          {year}
+                        </span>
+                        <span className="text-yellow-600/80 text-xs font-mono">
+                          {decadeFilms}
+                        </span>
+                      </div>
+
+                      {/* Decade separator line for non-last items */}
+                      {i < years.length - 1 && (
+                        <div className="absolute top-0 w-1 h-6 bg-yellow-500/20 translate-x-full -translate-y-6" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Legend */}
+              <div className="mt-3 text-center">
+                <span className="text-yellow-500/70 text-xs uppercase tracking-wider">
+                  Year • Film Count
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Control Panel */}
       <ControlPanel
