@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
 import { GraphData, NodeData } from '../types';
 import { createPosterNode, createGeometryNode } from '../utils/nodeHelpers';
@@ -88,6 +88,136 @@ const Graph: React.FC<GraphProps> = ({
   posterScale,
   lineOpacity
 }) => {
+
+  // Blood particle systems for links
+  const bloodParticlesRef = useRef<Map<string, THREE.Points>>(new Map());
+
+  // Create blood particle system for a link
+  const createBloodParticles = useCallback((link: any) => {
+    const sourceNode = typeof link.source === 'object' ? link.source : data.nodes?.find(n => n.id === link.source);
+    const targetNode = typeof link.target === 'object' ? link.target : data.nodes?.find(n => n.id === link.target);
+
+    if (!sourceNode || !targetNode) return null;
+
+    // Create particle geometry
+    const particleCount = 8;
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    // Initialize particles along the link
+    for (let i = 0; i < particleCount; i++) {
+      const t = i / (particleCount - 1); // Position along link (0 to 1)
+
+      // Interpolate position between source and target
+      positions[i * 3] = sourceNode.x + (targetNode.x - sourceNode.x) * t;
+      positions[i * 3 + 1] = sourceNode.y + (targetNode.y - sourceNode.y) * t;
+      positions[i * 3 + 2] = sourceNode.z + (targetNode.z - sourceNode.z) * t;
+
+      // Blood red color with slight variation
+      colors[i * 3] = 0.8 + Math.random() * 0.2;     // R
+      colors[i * 3 + 1] = 0.0;                        // G
+      colors[i * 3 + 2] = 0.0;                        // B
+
+      // Varying sizes for organic look
+      sizes[i] = 2 + Math.random() * 3;
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    // Create material
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 }
+      },
+      vertexShader: `
+        attribute float size;
+        attribute vec3 color;
+        varying vec3 vColor;
+        uniform float time;
+
+        void main() {
+          vColor = color;
+
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+
+          // Add slight wave motion
+          mvPosition.y += sin(time * 2.0 + position.x * 0.1) * 2.0;
+
+          gl_PointSize = size * (300.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+
+        void main() {
+          // Create circular blood droplet
+          float r = length(gl_PointCoord - vec2(0.5));
+          if (r > 0.5) discard;
+
+          // Blood droplet with highlight
+          float alpha = 1.0 - smoothstep(0.3, 0.5, r);
+          vec3 bloodColor = vColor;
+
+          // Add highlight
+          float highlight = 1.0 - smoothstep(0.0, 0.2, r);
+          bloodColor += vec3(0.3, 0.1, 0.1) * highlight;
+
+          gl_FragColor = vec4(bloodColor, alpha * 0.8);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+
+    const particles = new THREE.Points(geometry, material);
+
+    // Store reference for animation
+    const linkId = `${sourceNode.id}-${targetNode.id}`;
+    bloodParticlesRef.current.set(linkId, particles);
+
+    return particles;
+  }, [data.nodes]);
+
+  // Animate blood particles
+  useEffect(() => {
+    const animateParticles = () => {
+      const time = Date.now() * 0.001; // Convert to seconds
+
+      bloodParticlesRef.current.forEach((particles, linkId) => {
+        if (particles.material instanceof THREE.ShaderMaterial) {
+          particles.material.uniforms.time.value = time;
+        }
+
+        // Animate particle positions along links
+        const geometry = particles.geometry;
+        const positions = geometry.attributes.position.array as Float32Array;
+
+        for (let i = 0; i < positions.length / 3; i++) {
+          // Add flowing motion
+          const baseIndex = i * 3;
+          const waveOffset = Math.sin(time * 1.5 + i * 0.5) * 3;
+
+          // Store original position and add wave motion
+          positions[baseIndex + 1] += waveOffset * 0.01; // Y position
+        }
+
+        geometry.attributes.position.needsUpdate = true;
+      });
+    };
+
+    const animationFrame = requestAnimationFrame(function animate() {
+      animateParticles();
+      requestAnimationFrame(animate);
+    });
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, []);
 
   // Debug logging
   useEffect(() => {
@@ -222,6 +352,33 @@ const Graph: React.FC<GraphProps> = ({
     return null; // Don't render anything during loading
   }
 
+  const linkThreeObject = useCallback((link: any) => {
+    // Only show blood particles on highlighted/selected connections
+    const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
+    const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
+
+    let shouldShowParticles = false;
+
+    if (selectedNode) {
+      const isConnected = (sourceId === selectedNode.id && neighbors.has(targetId)) ||
+                         (targetId === selectedNode.id && neighbors.has(sourceId));
+      shouldShowParticles = isConnected;
+    } else if (highlightedCategory) {
+      const source = link.source as NodeData;
+      const target = link.target as NodeData;
+      const sourceMatch = source.subclouds && source.subclouds.includes(highlightedCategory);
+      const targetMatch = target.subclouds && target.subclouds.includes(highlightedCategory);
+      shouldShowParticles = sourceMatch && targetMatch;
+    }
+
+    // Only create particles for important connections to avoid performance issues
+    if (shouldShowParticles) {
+      return createBloodParticles(link);
+    }
+
+    return null; // Use default link rendering
+  }, [selectedNode, neighbors, highlightedCategory, createBloodParticles]);
+
   return (
     <div className="w-full h-screen">
       <ForceGraph3D
@@ -229,6 +386,7 @@ const Graph: React.FC<GraphProps> = ({
         graphData={data}
         nodeLabel={(node: any) => `${node.name} (${node.year})`}
         nodeThreeObject={nodeThreeObject}
+        linkThreeObject={linkThreeObject}
 
         showNavInfo={false}
 
