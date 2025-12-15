@@ -17,18 +17,63 @@ interface GraphProps {
   lineOpacity: number;
 }
 
-// Subcloud cluster positions for better grouping
+// Subcloud cluster positions for better grouping - expanded for full Tarantino network
 const SUBCLOUD_CLUSTERS: Record<string, { x: number; y: number }> = {
+  // Core Tarantino
   'kill-bill-core': { x: 0, y: 0 },
-  'samurai': { x: -150, y: 100 },
-  'kung-fu': { x: -100, y: -100 },
-  'spaghetti-western': { x: 150, y: 100 },
-  'blaxploitation': { x: 100, y: -150 },
-  'exploitation': { x: -150, y: -100 },
-  'grindhouse': { x: -200, y: 0 },
-  'modern-revenge': { x: 200, y: 0 },
+
+  // Asian Cinema (left side)
+  'samurai': { x: -200, y: 100 },
+  'kung-fu': { x: -150, y: -50 },
+  'wuxia': { x: -180, y: 20 },
+  'anime': { x: -220, y: -80 },
+  'anime-influenced': { x: -220, y: -80 },
+  'hong-kong-action': { x: -120, y: -120 },
+  'heroic-bloodshed': { x: -100, y: -150 },
+
+  // Westerns (right side)
+  'spaghetti-western': { x: 200, y: 100 },
+  'western': { x: 180, y: 50 },
+  'revisionist': { x: 220, y: 150 },
+
+  // Exploitation/Grindhouse (bottom left)
+  'exploitation': { x: -150, y: -180 },
+  'grindhouse': { x: -180, y: -220 },
+  'neo-grindhouse': { x: -100, y: -200 },
+  'blaxploitation': { x: -50, y: -180 },
+
+  // Crime/Noir (top)
   'noir': { x: 0, y: 200 },
+  'film-noir': { x: 30, y: 220 },
+  'neo-noir': { x: -30, y: 180 },
+  'crime': { x: 50, y: 150 },
+  'heist': { x: 80, y: 180 },
+
+  // Modern Action (right bottom)
+  'modern-revenge': { x: 200, y: -50 },
+  'modern-action': { x: 180, y: -100 },
+
+  // Female-led (bottom right)
+  'female-action': { x: 150, y: -150 },
+  'female-lead': { x: 130, y: -180 },
+  'female-ensemble': { x: 170, y: -180 },
+  'revenge': { x: 100, y: -120 },
+
+  // Car chase/Road films (bottom)
+  'car-chase': { x: 0, y: -250 },
+  '70s-cinema': { x: -50, y: -230 },
+
+  // War/WWII (top right)
+  'wwii': { x: 250, y: 200 },
+  'war': { x: 230, y: 180 },
+  'men-on-mission': { x: 270, y: 220 },
+
+  // French New Wave (top left)
+  'french-new-wave': { x: -250, y: 180 },
+
+  // Foundation/Default
   'foundation': { x: 0, y: -200 },
+  'action': { x: 50, y: -50 },
 };
 
 const Graph: React.FC<GraphProps> = ({

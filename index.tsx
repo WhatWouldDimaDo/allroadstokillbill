@@ -182,27 +182,67 @@ const ControlPanel = ({
                             </div>
                         </div>
 
-                        {/* Presets */}
+                        {/* Tarantino Films */}
                         <div>
-                            <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 border-b border-red-900/30 pb-1">Scenarios</h3>
-                            <div className="space-y-2 font-mono text-xs">
-                                <button onClick={() => applyPreset('all')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                            <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 border-b border-red-900/30 pb-1">Tarantino Films</h3>
+                            <div className="space-y-1 font-mono text-xs">
+                                <button onClick={() => applyPreset('reservoir-dogs')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Reservoir Dogs (1992)
+                                </button>
+                                <button onClick={() => applyPreset('pulp-fiction')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Pulp Fiction (1994)
+                                </button>
+                                <button onClick={() => applyPreset('jackie-brown')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Jackie Brown (1997)
+                                </button>
+                                <button onClick={() => applyPreset('kb-influences')} className="w-full text-left px-4 py-2.5 bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-400 border-l-2 border-yellow-400 transition-all uppercase">
+                                    Kill Bill (2003-04)
+                                </button>
+                                <button onClick={() => applyPreset('death-proof')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Death Proof (2007)
+                                </button>
+                                <button onClick={() => applyPreset('inglourious-basterds')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Inglourious Basterds (2009)
+                                </button>
+                                <button onClick={() => applyPreset('django-unchained')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Django Unchained (2012)
+                                </button>
+                                <button onClick={() => applyPreset('hateful-eight')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    The Hateful Eight (2015)
+                                </button>
+                                <button onClick={() => applyPreset('hollywood')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Hollywood (2019)
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Genre Presets */}
+                        <div>
+                            <h3 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-3 border-b border-red-900/30 pb-1">Genres</h3>
+                            <div className="space-y-1 font-mono text-xs">
+                                <button onClick={() => applyPreset('all')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
                                     Show Full Network
                                 </button>
-                                <button onClick={() => applyPreset('kb-influences')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    Origins of Kill Bill
-                                </button>
-                                <button onClick={() => applyPreset('anime')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    Anime Influences
-                                </button>
-                                <button onClick={() => applyPreset('western')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                <button onClick={() => applyPreset('western')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
                                     Westerns
                                 </button>
-                                <button onClick={() => applyPreset('femme')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                <button onClick={() => applyPreset('crime')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Crime & Noir
+                                </button>
+                                <button onClick={() => applyPreset('exploitation')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Exploitation
+                                </button>
+                                <button onClick={() => applyPreset('femme')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
                                     Femme Fatale
                                 </button>
-                                 <button onClick={() => applyPreset('crime')} className="w-full text-left px-4 py-3 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
-                                    Crime & Noir
+                                <button onClick={() => applyPreset('anime')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Anime
+                                </button>
+                                <button onClick={() => applyPreset('hong-kong')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    Hong Kong Action
+                                </button>
+                                <button onClick={() => applyPreset('wwii')} className="w-full text-left px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-yellow-400 border-l-2 border-transparent hover:border-yellow-400 transition-all uppercase">
+                                    WWII Films
                                 </button>
                             </div>
                         </div>
@@ -468,21 +508,49 @@ const App = () => {
       setYearRange([1940, 2025]);
   };
 
-  // Preset Logic
-  const applyPreset = (preset: 'all' | 'kb-influences' | 'kb-influenced' | 'anime' | 'western' | 'exploitation' | 'femme' | 'crime') => {
+  // Preset Logic - Enhanced for all Tarantino films
+  const applyPreset = (preset: string) => {
       setSelectedNode(null);
       resetFilters();
+
+      // Tarantino Film Presets - filter by tarantino_connection or find central node
+      const tarantinoFilms: Record<string, { subclouds: string[], searchTerm?: string }> = {
+          'reservoir-dogs': { subclouds: ['heist', 'crime', 'noir', 'hong-kong-action', 'heroic-bloodshed', 'neo-noir'], searchTerm: 'reservoir dogs' },
+          'pulp-fiction': { subclouds: ['crime', 'noir', 'neo-noir', 'french-new-wave', 'anthology'], searchTerm: 'pulp fiction' },
+          'jackie-brown': { subclouds: ['blaxploitation', 'crime', 'noir'], searchTerm: 'jackie brown' },
+          'death-proof': { subclouds: ['car-chase', 'exploitation', 'grindhouse', '70s-cinema'], searchTerm: 'death proof' },
+          'inglourious-basterds': { subclouds: ['wwii', 'war', 'men-on-mission', 'spaghetti-western'], searchTerm: 'inglourious basterds' },
+          'django-unchained': { subclouds: ['spaghetti-western', 'western', 'revisionist'], searchTerm: 'django unchained' },
+          'hateful-eight': { subclouds: ['western', 'spaghetti-western', 'revisionist'], searchTerm: 'hateful eight' },
+          'hollywood': { subclouds: ['70s-cinema', 'western', 'crime'], searchTerm: 'once upon a time in hollywood' },
+      };
 
       if (preset === 'all') {
           handleResetCamera();
       } else if (preset === 'kb-influences') {
           const kb1 = INITIAL_GRAPH_DATA.nodes.find(n => n.id.includes('kill-bill-vol-1'));
           if (kb1) handleNodeClick(kb1);
+      } else if (tarantinoFilms[preset]) {
+          const config = tarantinoFilms[preset];
+          setFilters({ subclouds: config.subclouds });
+          // Try to find and focus on the Tarantino film itself
+          if (config.searchTerm) {
+              const centralNode = INITIAL_GRAPH_DATA.nodes.find(n =>
+                  n.name.toLowerCase().includes(config.searchTerm!)
+              );
+              if (centralNode) {
+                  setTimeout(() => handleNodeClick(centralNode), 500);
+              } else {
+                  handleResetCamera();
+              }
+          } else {
+              handleResetCamera();
+          }
       } else if (preset === 'anime') {
           setFilters({ subclouds: ['anime', 'anime-influenced', 'sci-fi-action'] });
           handleResetCamera();
       } else if (preset === 'western') {
-          setFilters({ subclouds: ['western', 'spaghetti-western'] });
+          setFilters({ subclouds: ['western', 'spaghetti-western', 'revisionist'] });
           handleResetCamera();
       } else if (preset === 'exploitation') {
           setFilters({ subclouds: ['exploitation', 'grindhouse', 'neo-grindhouse', 'blaxploitation'] });
@@ -491,7 +559,13 @@ const App = () => {
           setFilters({ subclouds: ['female-action', 'female-lead', 'female-ensemble', 'revenge', 'modern-revenge'] });
           handleResetCamera();
       } else if (preset === 'crime') {
-          setFilters({ subclouds: ['crime', 'noir', 'film-noir', 'yakuza', 'action'] });
+          setFilters({ subclouds: ['crime', 'noir', 'film-noir', 'neo-noir', 'heist', 'yakuza', 'action'] });
+          handleResetCamera();
+      } else if (preset === 'hong-kong') {
+          setFilters({ subclouds: ['hong-kong-action', 'heroic-bloodshed', 'kung-fu', 'wuxia'] });
+          handleResetCamera();
+      } else if (preset === 'wwii') {
+          setFilters({ subclouds: ['wwii', 'war', 'men-on-mission'] });
           handleResetCamera();
       }
   };
