@@ -689,7 +689,7 @@ const App = () => {
   const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
   const [neighbors, setNeighbors] = useState<Set<string>>(new Set());
-  const [graphRef, setGraphRef] = useState<any>(null);
+  const graphRef = useRef<any>(null);
 
   // Complete intro after a short delay
   useEffect(() => {
