@@ -1,5 +1,6 @@
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GraphData, NodeData } from '../types';
 import { createPosterNode, createGeometryNode } from '../utils/nodeHelpers';
 import * as THREE from 'three';
@@ -88,6 +89,31 @@ const Graph: React.FC<GraphProps> = ({
   posterScale,
   lineOpacity
 }) => {
+  // Mobile detection and touch gesture support
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/iPhone|iPad|Android/i.test(navigator.userAgent) ||
+                   window.matchMedia('(max-width: 768px)').matches);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Haptic feedback utility
+  const hapticFeedback = useCallback((type: 'light' | 'medium' | 'heavy') => {
+    if (navigator.vibrate && isMobile) {
+      const patterns = {
+        light: 10,
+        medium: 20,
+        heavy: 30
+      };
+      navigator.vibrate(patterns[type]);
+    }
+  }, [isMobile]);
 
   // Blood particle systems for links
   const bloodParticlesRef = useRef<Map<string, THREE.Points>>(new Map());
@@ -381,6 +407,55 @@ const Graph: React.FC<GraphProps> = ({
 
   return (
     <div className="w-full h-screen">
+      {/* Mobile Control Panel */}
+      {isMobile && (
+        <div className="fixed bottom-4 left-4 right-4 bg-black/80 backdrop-blur-sm border border-yellow-500/30 rounded-lg p-4 z-10">
+          <div className="grid grid-cols-3 gap-3">
+            {/* Zoom controls */}
+            <button
+              className="bg-red-600 text-white p-4 rounded-lg text-xl font-bold"
+              onClick={() => {
+                if (graphRef.current) {
+                  const currentPos = graphRef.current.cameraPosition();
+                  const newZ = Math.max(50, currentPos.z - 100); // Zoom in
+                  graphRef.current.cameraPosition({ ...currentPos, z: newZ }, undefined, 500);
+                  hapticFeedback('light');
+                }
+              }}
+            >
+              🔍+
+            </button>
+
+            <button
+              className="bg-red-600 text-white p-4 rounded-lg text-xl font-bold"
+              onClick={() => {
+                if (graphRef.current) {
+                  const currentPos = graphRef.current.cameraPosition();
+                  const newZ = Math.min(1000, currentPos.z + 100); // Zoom out
+                  graphRef.current.cameraPosition({ ...currentPos, z: newZ }, undefined, 500);
+                  hapticFeedback('light');
+                }
+              }}
+            >
+              🔍-
+            </button>
+
+            {/* Reset view */}
+            <button
+              className="bg-yellow-500 text-black p-4 rounded-lg text-xl font-bold"
+              onClick={() => {
+                if (graphRef.current) {
+                  graphRef.current.cameraPosition({ x: 0, y: 0, z: 400 }, { x: 0, y: 0, z: 0 }, 1000);
+                  hapticFeedback('heavy');
+                }
+              }}
+            >
+              ↺ Reset
+            </button>
+          </div>
+        </div>
+      )}
+
       <ForceGraph3D
         ref={graphRef}
         graphData={data}
@@ -389,6 +464,11 @@ const Graph: React.FC<GraphProps> = ({
         linkThreeObject={linkThreeObject}
 
         showNavInfo={false}
+
+        // Enable OrbitControls for touch gesture support
+        enableNodeDrag={false}
+        enableNavigationControls={true}
+        controlType="orbit"
 
         linkWidth={link => {
             const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
@@ -447,6 +527,9 @@ const Graph: React.FC<GraphProps> = ({
         d3VelocityDecay={0.3}
 
         onNodeClick={(node) => {
+          // Haptic feedback for node selection
+          hapticFeedback('medium');
+
           const dist = viewMode === '2d' ? 200 : 150;
           if (graphRef.current) {
             const newPos = {

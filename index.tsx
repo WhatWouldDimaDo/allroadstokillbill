@@ -2,21 +2,69 @@ import React, { useRef, useState, useMemo, useCallback, useEffect, Suspense, laz
 import { createRoot } from "react-dom/client";
 import Fuse from 'fuse.js';
 import { INITIAL_GRAPH_DATA, COLOR_PALETTE } from "./graphData_final_with_posters";
-import { NodeData } from "./types";
+import { NodeData, Scene, SceneInfluence, InfluenceType, hasSceneData, getEnrichmentLevel } from "./types";
+import { GestureTutorial } from "./components/GestureTutorial";
 
-// Lazy load the Graph component for better performance
 const Graph = lazy(() => import("./components/Graph"));
 
-// --- Film Detail Panel Component ---
-const FilmDetailPanel = ({
-  node,
-  onClose
-}: {
-  node: NodeData | null;
-  onClose: () => void;
-}) => {
-  if (!node) return null;
+// --- Tab Components ---
 
+const FilmHeader = ({ node, onClose }: { node: NodeData; onClose: () => void }) => (
+  <div className="relative h-32 bg-gradient-to-b from-yellow-400/20 to-transparent">
+    {node.posterUrl && (
+      <img
+        src={node.posterUrl}
+        alt={node.name}
+        className="absolute right-4 top-4 w-20 h-28 object-cover rounded shadow-lg border border-gray-600"
+      />
+    )}
+    <button
+      onClick={onClose}
+      className="absolute top-2 left-2 text-gray-400 hover:text-white p-1"
+    >
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    <div className="absolute bottom-2 left-4 right-28">
+      <h3 className="text-white font-black text-lg leading-tight">{node.name}</h3>
+      <p className="text-yellow-400 text-sm font-mono">{node.year}</p>
+    </div>
+  </div>
+);
+
+const TabNavigation = ({
+  activeTab,
+  onTabChange,
+  hasScenes
+}: {
+  activeTab: string;
+  onTabChange: (tab: 'overview' | 'scenes' | 'influences' | 'cast') => void;
+  hasScenes: boolean;
+}) => (
+  <div className="flex border-b border-gray-800">
+    {[
+      { id: 'overview', label: 'Overview', always: true },
+      { id: 'scenes', label: 'Scenes', always: hasScenes },
+      { id: 'influences', label: 'Influences', always: true },
+      { id: 'cast', label: 'Cast & Crew', always: true }
+    ].filter(tab => tab.always).map(tab => (
+      <button
+        key={tab.id}
+        onClick={() => onTabChange(tab.id as any)}
+        className={`flex-1 py-3 text-xs font-bold uppercase tracking-widest transition-colors ${
+          activeTab === tab.id
+            ? 'text-yellow-400 bg-gray-900 border-b-2 border-yellow-400'
+            : 'text-gray-500 hover:text-white bg-black'
+        }`}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+);
+
+const OverviewTab = ({ node }: { node: NodeData }) => {
   const formatRuntime = (minutes?: number) => {
     if (!minutes) return null;
     const hrs = Math.floor(minutes / 60);
@@ -24,189 +72,464 @@ const FilmDetailPanel = ({
     return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
   };
 
+  const formatCurrency = (amount?: number) => {
+    if (!amount) return null;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1
+    }).format(amount);
+  };
+
   return (
-    <div className="absolute bottom-4 right-4 w-80 md:w-96 bg-black/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl z-30 overflow-hidden">
-      {/* Header with poster thumbnail */}
-      <div className="relative h-32 bg-gradient-to-b from-yellow-400/20 to-transparent">
-        {node.posterUrl && (
-          <img
-            src={node.posterUrl}
-            alt={node.name}
-            className="absolute right-4 top-4 w-20 h-28 object-cover rounded shadow-lg border border-gray-600"
-          />
-        )}
-        <button
-          onClick={onClose}
-          className="absolute top-2 left-2 text-gray-400 hover:text-white p-1"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        <div className="absolute bottom-2 left-4 right-28">
-          <h3 className="text-white font-black text-lg leading-tight">{node.name}</h3>
-          <p className="text-yellow-400 text-sm font-mono">{node.year}</p>
+    <div className="space-y-4">
+      {/* Tagline */}
+      {node.tagline && (
+        <div className="border-l-4 border-yellow-400 pl-3">
+          <p className="text-gray-300 italic text-sm">"{node.tagline}"</p>
         </div>
+      )}
+
+      {/* Core Info Grid */}
+      <div className="grid grid-cols-2 gap-3 text-sm">
+        {node.director && (
+          <InfoRow label="Director" value={node.director} />
+        )}
+        {node.cinematographer && (
+          <InfoRow label="Cinematography" value={node.cinematographer} />
+        )}
+        {node.composer && (
+          <InfoRow label="Music" value={node.composer} />
+        )}
+        {node.runtime && (
+          <InfoRow label="Runtime" value={formatRuntime(node.runtime)} />
+        )}
+        {node.contentRating && (
+          <InfoRow label="Rating" value={node.contentRating} />
+        )}
+        {node.year && (
+          <InfoRow label="Release" value={node.year.toString()} />
+        )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-3">
-        {/* Director & Country */}
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-gray-400">Director:</span>
-          <span className="text-white font-medium">{node.director || 'Unknown'}</span>
-        </div>
+      {/* Rating & Box Office */}
+      <div className="flex items-center gap-4 pt-2 border-t border-gray-800">
+        {node.rating && (
+          <div className="flex items-center gap-1">
+            <span className="text-yellow-400 text-lg">★</span>
+            <span className="text-white font-bold text-lg">{node.rating.toFixed(1)}</span>
+            <span className="text-gray-500 text-xs">/10</span>
+          </div>
+        )}
+        {node.boxOffice && (
+          <div className="text-gray-300 text-sm">
+            <span className="text-gray-500">Box Office:</span> {formatCurrency(node.boxOffice)}
+          </div>
+        )}
+      </div>
 
-        {/* Rating & Runtime */}
-        <div className="flex items-center gap-4">
-          {node.rating && (
-            <div className="flex items-center gap-1">
-              <span className="text-yellow-400">★</span>
-              <span className="text-white font-bold">{node.rating.toFixed(1)}</span>
-              <span className="text-gray-500 text-xs">/10</span>
-            </div>
-          )}
-          {node.runtime && (
-            <div className="text-gray-300 text-sm">
-              {formatRuntime(node.runtime)}
-            </div>
-          )}
-        </div>
+      {/* Overview Text */}
+      {node.overview && (
+        <p className="text-gray-400 text-sm leading-relaxed">
+          {node.overview}
+        </p>
+      )}
 
-        {/* Overview */}
-        {node.overview && (
-          <p className="text-gray-400 text-xs leading-relaxed line-clamp-3">
-            {node.overview}
-          </p>
+      {/* Cultural Impact */}
+      {node.culturalImpact && (
+        <div className="pt-3 border-t border-gray-800">
+          <h4 className="text-yellow-400 text-xs uppercase font-bold mb-2">Cultural Impact</h4>
+          <p className="text-gray-400 text-sm leading-relaxed">{node.culturalImpact}</p>
+        </div>
+      )}
+
+      {/* Genres */}
+      {node.genres && node.genres.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {node.genres.map((genre, i) => (
+            <span
+              key={i}
+              className="px-2 py-0.5 bg-gray-800 text-gray-300 text-[10px] uppercase rounded"
+            >
+              {genre}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* External Links */}
+      <div className="flex gap-2 pt-2">
+        {node.trailerUrl && <ExternalLink href={node.trailerUrl} label="▶ Trailer" color="red" />}
+        {node.imdbId && <ExternalLink href={`https://www.imdb.com/title/${node.imdbId}/`} label="IMDb" color="yellow" />}
+        {node.tmdbId && <ExternalLink href={`https://www.themoviedb.org/movie/${node.tmdbId}`} label="TMDB" color="blue" />}
+      </div>
+
+      {/* Trivia */}
+      {node.trivia && node.trivia.length > 0 && (
+        <div className="pt-3 border-t border-gray-800">
+          <h4 className="text-yellow-400 text-xs uppercase font-bold mb-2">Trivia</h4>
+          <ul className="space-y-2">
+            {node.trivia.slice(0, 3).map((fact, i) => (
+              <li key={i} className="text-gray-400 text-xs leading-relaxed flex">
+                <span className="text-yellow-400 mr-2">•</span>
+                <span>{fact}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ScenesTab = ({ node }: { node: NodeData }) => {
+  const [selectedScene, setSelectedScene] = useState<Scene | null>(null);
+
+  if (!node.notableScenes || node.notableScenes.length === 0) {
+    return (
+      <div className="text-center py-12 text-gray-500">
+        <p className="text-sm">No scene data available yet.</p>
+        <p className="text-xs mt-2">Check back after enrichment pipeline runs.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-yellow-400 text-sm uppercase font-bold">
+        Notable Scenes ({node.notableScenes.length})
+      </h3>
+
+      {/* Scene List */}
+      <div className="space-y-3">
+        {node.notableScenes.map((scene) => (
+          <div key={scene.id}>
+            <SceneCard
+              scene={scene}
+              isExpanded={selectedScene?.id === scene.id}
+              onClick={() => setSelectedScene(selectedScene?.id === scene.id ? null : scene)}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const InfluencesTab = ({ node }: { node: NodeData }) => (
+  <div className="space-y-4">
+    {/* Influenced By */}
+    {node.influencedBy && node.influencedBy.length > 0 && (
+      <div>
+        <h4 className="text-yellow-400 text-xs uppercase font-bold mb-3">Influenced By</h4>
+        <div className="space-y-2">
+          {node.influencedBy.map((filmName, i) => {
+            const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
+            return (
+              <div key={i}>
+                <FilmRelationCard filmName={filmName} filmData={filmData} type="source" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+    {/* Influences */}
+    {node.influences && node.influences.length > 0 && (
+      <div className="pt-3 border-t border-gray-800">
+        <h4 className="text-yellow-400 text-xs uppercase font-bold mb-3">Influences</h4>
+        <div className="space-y-2">
+          {node.influences.map((filmName, i) => {
+            const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
+            return (
+              <div key={i}>
+                <FilmRelationCard filmName={filmName} filmData={filmData} type="target" />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    )}
+
+    {/* Detailed Influence Map */}
+    {node.influenceMap && node.influenceMap.length > 0 && (
+      <div className="pt-3 border-t border-gray-800">
+        <h4 className="text-yellow-400 text-xs uppercase font-bold mb-3">Detailed Analysis</h4>
+        <div className="space-y-3">
+          {node.influenceMap.map((influence, i) => (
+            <div key={i} className="bg-gray-900/50 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-white text-sm font-medium">{influence.targetFilm}</p>
+                <StrengthBadge strength={influence.strength} />
+              </div>
+              {influence.evidence.length > 0 && (
+                <ul className="space-y-1">
+                  {influence.evidence.map((item, idx) => (
+                    <li key={idx} className="text-gray-400 text-xs flex">
+                      <span className="text-yellow-400 mr-2">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+const CastTab = ({ node }: { node: NodeData }) => (
+  <div className="space-y-4">
+    {/* Cast */}
+    {node.cast && node.cast.length > 0 && (
+      <div>
+        <h4 className="text-yellow-400 text-xs uppercase font-bold mb-3">Cast</h4>
+        <div className="space-y-2">
+          {node.cast.map((member, i) => (
+            <div key={i} className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-2">
+              <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-400 text-xs font-bold">
+                {member.name.charAt(0)}
+              </div>
+              <div className="flex-1">
+                <p className="text-white text-sm font-medium">{member.name}</p>
+                <p className="text-gray-500 text-xs">{member.character}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {/* Awards */}
+    {node.awards && node.awards.length > 0 && (
+      <div className="pt-3 border-t border-gray-800">
+        <h4 className="text-yellow-400 text-xs uppercase font-bold mb-3">Awards & Nominations</h4>
+        <div className="space-y-2">
+          {node.awards.map((award, i) => (
+            <div key={i} className="flex items-start gap-2 bg-gray-900/50 rounded-lg p-2">
+              <div className="text-lg flex-shrink-0">
+                {award.result === 'won' ? '🏆' : '🎖️'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium">{award.name}</p>
+                <p className="text-gray-400 text-xs">{award.category}</p>
+                <p className="text-gray-500 text-[10px] mt-0.5">{award.year} • {award.result === 'won' ? 'Winner' : 'Nominated'}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+);
+
+// --- Helper Components ---
+
+const InfoRow = ({ label, value }: { label: string; value: string }) => (
+  <div>
+    <span className="text-gray-500 text-xs">{label}:</span>
+    <p className="text-white text-sm font-medium">{value}</p>
+  </div>
+);
+
+const ExternalLink = ({ href, label, color }: { href: string; label: string; color: string }) => {
+  const colorClasses = {
+    red: 'bg-red-600 hover:bg-red-500',
+    yellow: 'bg-yellow-500 hover:bg-yellow-400 text-black',
+    blue: 'bg-blue-600 hover:bg-blue-500'
+  };
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`flex-1 py-2 px-3 ${colorClasses[color as keyof typeof colorClasses]} text-white text-xs font-bold uppercase text-center rounded transition-colors`}
+    >
+      {label}
+    </a>
+  );
+};
+
+const SceneCard = ({ scene, isExpanded, onClick }: {
+  scene: Scene;
+  isExpanded: boolean;
+  onClick: () => void;
+}) => (
+  <div
+    className={`border border-gray-700 rounded-lg overflow-hidden cursor-pointer transition-all ${
+      isExpanded ? 'bg-gray-900' : 'bg-gray-800/50 hover:bg-gray-800'
+    }`}
+    onClick={onClick}
+  >
+    {/* Scene Header */}
+    <div className="p-3 flex items-start justify-between">
+      <div className="flex-1">
+        <h4 className="text-white font-bold text-sm">{scene.title}</h4>
+        {scene.timestamp && (
+          <p className="text-gray-500 text-xs font-mono mt-0.5">{scene.timestamp}</p>
+        )}
+      </div>
+      <svg
+        className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+
+    {/* Expanded Content */}
+    {isExpanded && (
+      <div className="px-3 pb-3 space-y-3 border-t border-gray-700 pt-3">
+        {/* Description */}
+        <p className="text-gray-400 text-xs leading-relaxed">{scene.description}</p>
+
+        {/* Influences */}
+        {scene.influences.length > 0 && (
+          <div>
+            <h5 className="text-yellow-400 text-[10px] uppercase font-bold mb-2">Influences</h5>
+            <div className="space-y-2">
+              {scene.influences.map((inf, idx) => (
+                <div key={idx} className="bg-black/50 rounded p-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-white text-xs font-medium">{inf.film}</p>
+                    <InfluenceTypeBadge type={inf.type} />
+                  </div>
+                  <p className="text-gray-400 text-[10px] mt-1">{inf.details}</p>
+                  {inf.confidence && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <div className={`w-2 h-2 rounded-full ${
+                        inf.confidence === 'high' ? 'bg-green-500' :
+                        inf.confidence === 'medium' ? 'bg-yellow-500' :
+                        'bg-gray-500'
+                      }`} />
+                      <span className="text-gray-500 text-[9px] uppercase">{inf.confidence} confidence</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
-        {/* Genres */}
-        {node.genres && node.genres.length > 0 && (
+        {/* Keywords */}
+        {scene.keywords && scene.keywords.length > 0 && (
           <div className="flex flex-wrap gap-1">
-            {node.genres.slice(0, 4).map((genre, i) => (
-              <span
-                key={i}
-                className="px-2 py-0.5 bg-gray-800 text-gray-300 text-[10px] uppercase rounded"
-              >
-                {genre}
+            {scene.keywords.map((keyword, i) => (
+              <span key={i} className="px-2 py-0.5 bg-gray-800 text-gray-400 text-[9px] rounded">
+                {keyword}
               </span>
             ))}
           </div>
         )}
 
-        {/* External Links */}
-        <div className="flex gap-2 pt-2 border-t border-gray-800">
-          {node.trailerUrl && (
-            <a
-              href={node.trailerUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white text-xs font-bold uppercase text-center rounded transition-colors"
-            >
-              ▶ Trailer
-            </a>
-          )}
-          {node.imdbId && (
-            <a
-              href={`https://www.imdb.com/title/${node.imdbId}/`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 py-2 px-3 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold uppercase text-center rounded transition-colors"
-            >
-              IMDb
-            </a>
-          )}
-          {node.tmdbId && (
-            <a
-              href={`https://www.themoviedb.org/movie/${node.tmdbId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase text-center rounded transition-colors"
-            >
-              TMDB
-            </a>
-          )}
-        </div>
+        {/* Video Link */}
+        {scene.videoUrl && (
+          <a
+            href={scene.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-yellow-400 hover:text-yellow-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span>Watch Scene ▶</span>
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+);
 
-        {/* Navigation to Related Films */}
-        {(node.influencedBy && node.influencedBy.length > 0) || (node.influences && node.influences.length > 0) ? (
-          <div className="pt-2 border-t border-gray-800 space-y-3">
-            {node.influencedBy && node.influencedBy.length > 0 && (
-              <div>
-                <span className="text-gray-500 uppercase text-[10px] mb-2 block">Influenced by:</span>
-                <div className="flex flex-wrap gap-1">
-                  {node.influencedBy.slice(0, 5).map((filmName, i) => {
-                    // Find the film data to get more info
-                    const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          if (filmData) {
-                            // Close current panel and select the new film
-                            onClose();
-                            setTimeout(() => {
-                              // Find and click the film in the graph
-                              const graph = document.querySelector('[data-force-graph-3d]') as any;
-                              if (graph && graph.__data && graph.__data.nodes) {
-                                const targetNode = graph.__data.nodes.find((n: any) => n.id === filmData.id);
-                                if (targetNode) {
-                                  // Simulate node click
-                                  const event = new CustomEvent('nodeClick', { detail: targetNode });
-                                  graph.dispatchEvent(event);
-                                }
-                              }
-                            }, 100);
-                          }
-                        }}
-                        className="px-2 py-1 bg-gray-800 hover:bg-yellow-400 hover:text-black text-gray-300 text-[9px] uppercase rounded transition-colors"
-                      >
-                        {filmName}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {node.influences && node.influences.length > 0 && (
-              <div>
-                <span className="text-gray-500 uppercase text-[10px] mb-2 block">Influenced:</span>
-                <div className="flex flex-wrap gap-1">
-                  {node.influences.slice(0, 5).map((filmName, i) => {
-                    // Find the film data to get more info
-                    const filmData = INITIAL_GRAPH_DATA.nodes.find(n => n.name === filmName);
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => {
-                          if (filmData) {
-                            // Close current panel and select the new film
-                            onClose();
-                            setTimeout(() => {
-                              // Find and click the film in the graph
-                              const graph = document.querySelector('[data-force-graph-3d]') as any;
-                              if (graph && graph.__data && graph.__data.nodes) {
-                                const targetNode = graph.__data.nodes.find((n: any) => n.id === filmData.id);
-                                if (targetNode) {
-                                  // Simulate node click
-                                  const event = new CustomEvent('nodeClick', { detail: targetNode });
-                                  graph.dispatchEvent(event);
-                                }
-                              }
-                            }, 100);
-                          }
-                        }}
-                        className="px-2 py-1 bg-gray-800 hover:bg-yellow-400 hover:text-black text-gray-300 text-[9px] uppercase rounded transition-colors"
-                      >
-                        {filmName}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        ) : null}
+const FilmRelationCard = ({ filmName, filmData, type }: {
+  filmName: string;
+  filmData?: NodeData;
+  type: 'source' | 'target';
+}) => (
+  <div className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-2 hover:bg-gray-800 transition-colors cursor-pointer">
+    {filmData?.posterUrl && (
+      <img
+        src={filmData.posterUrl}
+        alt={filmName}
+        className="w-10 h-14 object-cover rounded"
+      />
+    )}
+    <div className="flex-1 min-w-0">
+      <p className="text-white text-sm font-medium truncate">{filmName}</p>
+      {filmData && (
+        <p className="text-gray-500 text-xs">{filmData.year} • {filmData.director}</p>
+      )}
+    </div>
+    <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  </div>
+);
+
+const StrengthBadge = ({ strength }: { strength: string }) => {
+  const colors = {
+    direct_homage: 'bg-red-900 text-red-300',
+    indirect_influence: 'bg-yellow-900 text-yellow-300',
+    thematic_parallel: 'bg-blue-900 text-blue-300'
+  };
+
+  return (
+    <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold ${colors[strength as keyof typeof colors] || 'bg-gray-900 text-gray-300'}`}>
+      {strength.replace('_', ' ')}
+    </span>
+  );
+};
+
+const InfluenceTypeBadge = ({ type }: { type: InfluenceType }) => {
+  const colors = {
+    visual_homage: 'bg-purple-900 text-purple-300',
+    narrative_parallel: 'bg-blue-900 text-blue-300',
+    soundtrack_reference: 'bg-green-900 text-green-300',
+    character_archetype: 'bg-yellow-900 text-yellow-300',
+    thematic_parallel: 'bg-pink-900 text-pink-300',
+    technique: 'bg-gray-900 text-gray-300'
+  };
+
+  const labels = {
+    visual_homage: 'Visual',
+    narrative_parallel: 'Narrative',
+    soundtrack_reference: 'Soundtrack',
+    character_archetype: 'Character',
+    thematic_parallel: 'Thematic',
+    technique: 'Technique'
+  };
+
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold ${colors[type]}`}>
+      {labels[type]}
+    </span>
+  );
+};
+
+const FilmDetailPanel = ({ node, onClose }: { node: NodeData | null; onClose: () => void }) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'scenes' | 'influences' | 'cast'>('overview');
+
+  if (!node) return null;
+
+  return (
+    <div className="absolute bottom-4 right-4 w-96 md:w-[480px] bg-black/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl z-30 overflow-hidden max-h-[85vh] flex flex-col">
+      {/* Header (keep existing poster thumbnail design) */}
+      <FilmHeader node={node} onClose={onClose} />
+
+      {/* Tab Navigation */}
+      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} hasScenes={hasSceneData(node)} />
+
+      {/* Tab Content (scrollable) */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {activeTab === 'overview' && <OverviewTab node={node} />}
+        {activeTab === 'scenes' && <ScenesTab node={node} />}
+        {activeTab === 'influences' && <InfluencesTab node={node} />}
+        {activeTab === 'cast' && <CastTab node={node} />}
       </div>
     </div>
   );
@@ -761,6 +1084,13 @@ const App = () => {
   const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
   const [neighbors, setNeighbors] = useState<Set<string>>(new Set());
+  const [showGestureTutorial, setShowGestureTutorial] = useState(() => {
+    // Show tutorial on first mobile visit
+    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent) ||
+                     window.matchMedia('(max-width: 768px)').matches;
+    const hasSeenTutorial = localStorage.getItem('gestureTutorialSeen');
+    return isMobile && !hasSeenTutorial;
+  });
   const graphRef = useRef<any>(null);
 
   // Complete intro after a short delay
@@ -1115,6 +1445,16 @@ const App = () => {
         }}
         onClose={() => setSearchResults([])}
       />
+
+      {/* Gesture Tutorial */}
+      {showGestureTutorial && (
+        <GestureTutorial
+          onDismiss={() => {
+            localStorage.setItem('gestureTutorialSeen', 'true');
+            setShowGestureTutorial(false);
+          }}
+        />
+      )}
 
       {/* Timeline Axis - No banner */}
       {viewMode === 'timeline' && (() => {
