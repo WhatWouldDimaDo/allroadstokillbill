@@ -169,6 +169,24 @@ const Graph: React.FC<GraphProps> = ({
     }
   }, [highlightedCategory, showPosters, selectedNode, neighbors, posterScale]);
 
+  // Check if we have data to render
+  if (!data || !data.nodes || data.nodes.length === 0) {
+    return (
+      <div className="w-full h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Loading Graph Data...</h2>
+          <p className="text-gray-400">If this persists, check browser console for errors.</p>
+          <div className="mt-4 text-xs text-gray-600">
+            <p>Data nodes: {data?.nodes?.length || 0}</p>
+            <p>Data links: {data?.links?.length || 0}</p>
+            <p>View mode: {viewMode}</p>
+            <p>Show posters: {showPosters ? 'true' : 'false'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-screen">
       <ForceGraph3D
@@ -182,36 +200,36 @@ const Graph: React.FC<GraphProps> = ({
         linkWidth={link => {
             const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
             const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
-            
+
             if (selectedNode) {
-                const isConnected = 
+                const isConnected =
                     (sourceId === selectedNode.id && neighbors.has(targetId)) ||
                     (targetId === selectedNode.id && neighbors.has(sourceId));
                 return isConnected ? 6 : 0.5;
             }
-            
+
             if (highlightedCategory) {
                 const source = link.source as NodeData;
                 const target = link.target as NodeData;
                 const sMatch = source.subclouds && source.subclouds.includes(highlightedCategory);
                 const tMatch = target.subclouds && target.subclouds.includes(highlightedCategory);
-                return (sMatch && tMatch) ? 6 : 1; 
+                return (sMatch && tMatch) ? 6 : 1;
             }
             return 3;
         }}
 
-        linkResolution={10} 
-        
+        linkResolution={10}
+
         linkColor={(link: any) => {
            const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
            const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
 
            // Selected Node Logic
            if (selectedNode) {
-                const isConnected = 
+                const isConnected =
                     (sourceId === selectedNode.id && neighbors.has(targetId)) ||
                     (targetId === selectedNode.id && neighbors.has(sourceId));
-                
+
                 return isConnected ? '#FFD700' : 'rgba(50,50,50,0.05)';
            }
 
@@ -226,14 +244,14 @@ const Graph: React.FC<GraphProps> = ({
 
            // Default Logic (No Selection)
            // Use the user-defined opacity
-           return `rgba(255,255,255,${lineOpacity})`; 
+           return `rgba(255,255,255,${lineOpacity})`;
         }}
 
         backgroundColor="#000000"
 
         numDimensions={3}
-        d3AlphaDecay={0.02} 
-        d3VelocityDecay={0.3} 
+        d3AlphaDecay={0.02}
+        d3VelocityDecay={0.3}
 
         onNodeClick={(node) => {
           const dist = viewMode === '2d' ? 200 : 150;
