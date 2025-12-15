@@ -171,20 +171,7 @@ const Graph: React.FC<GraphProps> = ({
 
   // Only render ForceGraph3D when we have actual data to prevent Three.js errors
   if (!data || !data.nodes || data.nodes.length === 0) {
-    return (
-      <div className="w-full h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Loading Graph Data...</h2>
-          <p className="text-gray-400">Building the Tarantino influence network...</p>
-          <div className="mt-4 text-xs text-gray-600">
-            <p>Data nodes: {data?.nodes?.length || 0}</p>
-            <p>Data links: {data?.links?.length || 0}</p>
-            <p>View mode: {viewMode}</p>
-            <p>Show posters: {showPosters ? 'true' : 'false'}</p>
-          </div>
-        </div>
-      </div>
-    );
+    return null; // Don't render anything during loading
   }
 
   return (

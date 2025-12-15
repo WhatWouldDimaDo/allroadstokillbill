@@ -613,19 +613,34 @@ const App = () => {
       )}
 
       {/* Graph Area */}
-      <Graph
-        key={introComplete ? 'graph-ready' : 'graph-loading'}
-        data={introComplete ? filteredData : { nodes: [], links: [] }}
-        onNodeClick={handleNodeClick}
-        graphRef={fgRef}
-        viewMode={viewMode}
-        showPosters={showPosters}
-        highlightedCategory={highlightedCategory}
-        selectedNode={selectedNode}
-        neighbors={neighbors}
-        posterScale={posterScale}
-        lineOpacity={lineOpacity}
-      />
+      {introComplete ? (
+        <Graph
+          key="graph-ready"
+          data={filteredData}
+          onNodeClick={handleNodeClick}
+          graphRef={fgRef}
+          viewMode={viewMode}
+          showPosters={showPosters}
+          highlightedCategory={highlightedCategory}
+          selectedNode={selectedNode}
+          neighbors={neighbors}
+          posterScale={posterScale}
+          lineOpacity={lineOpacity}
+        />
+      ) : (
+        <div className="w-full h-screen bg-black text-white flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Loading Graph Data...</h2>
+            <p className="text-gray-400">Building the Tarantino influence network...</p>
+            <div className="mt-4 text-xs text-gray-600">
+              <p>Data nodes: {filteredData.nodes.length}</p>
+              <p>Data links: {filteredData.links.length}</p>
+              <p>View mode: {viewMode}</p>
+              <p>Show posters: {showPosters ? 'true' : 'false'}</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Control Panel (Left Sidebar / Drawer) */}
       <ControlPanel 
