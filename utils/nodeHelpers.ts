@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { NodeData } from '../types';
+import { posterLoader } from './posterLoader';
 
 export const createGeometryNode = (node: NodeData, isDimmed: boolean = false): THREE.Object3D => {
     const isCenterNode = node.name.toLowerCase().includes('kill bill');
@@ -216,19 +217,33 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
       contentMaterial.color.setHex(0x555555); 
   }
 
-  // Load poster with better error handling
-  if (node.posterUrl) {
-    const loader = new THREE.TextureLoader();
-    loader.setCrossOrigin('anonymous');
-    loader.load(
-      node.posterUrl,
-      (loadedTex) => {
-        loadedTex.colorSpace = THREE.SRGBColorSpace;
-        contentMaterial.map = loadedTex;
-        contentMaterial.needsUpdate = true;
+  // Load poster using the dynamic poster loader
+  const loadPosterAsync = async () => {
+    try {
+      const posterUrl = await posterLoader.getPosterUrl(node.id, node.name, node.year);
+      if (posterUrl && posterUrl !== node.posterUrl) {
+        const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('anonymous');
+        loader.load(
+          posterUrl,
+          (loadedTex) => {
+            loadedTex.colorSpace = THREE.SRGBColorSpace;
+            contentMaterial.map = loadedTex;
+            contentMaterial.needsUpdate = true;
+          },
+          undefined,
+          (error) => {
+            console.warn(`Failed to load poster texture for ${node.name}:`, error);
+          }
+        );
       }
-    );
-  }
+    } catch (error) {
+      console.warn(`Failed to get poster URL for ${node.name}:`, error);
+    }
+  };
+
+  // Load poster asynchronously
+  loadPosterAsync();
 
   const contentSprite = new THREE.Sprite(contentMaterial);
   contentSprite.scale.set(width, height, 1);

@@ -1,8 +1,153 @@
-import React, { useRef, useState, useMemo, useCallback, useEffect } from "react";
+import React, { useRef, useState, useMemo, useCallback, useEffect, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
-import Graph from "./components/Graph";
 import { INITIAL_GRAPH_DATA, COLOR_PALETTE } from "./graphData_final_with_posters";
 import { NodeData } from "./types";
+
+// Lazy load the Graph component for better performance
+const Graph = lazy(() => import("./components/Graph"));
+
+// --- Film Detail Panel Component ---
+const FilmDetailPanel = ({
+  node,
+  onClose
+}: {
+  node: NodeData | null;
+  onClose: () => void;
+}) => {
+  if (!node) return null;
+
+  const formatRuntime = (minutes?: number) => {
+    if (!minutes) return null;
+    const hrs = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    return hrs > 0 ? `${hrs}h ${mins}m` : `${mins}m`;
+  };
+
+  return (
+    <div className="absolute bottom-4 right-4 w-80 md:w-96 bg-black/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl z-30 overflow-hidden">
+      {/* Header with poster thumbnail */}
+      <div className="relative h-32 bg-gradient-to-b from-yellow-400/20 to-transparent">
+        {node.posterUrl && (
+          <img
+            src={node.posterUrl}
+            alt={node.name}
+            className="absolute right-4 top-4 w-20 h-28 object-cover rounded shadow-lg border border-gray-600"
+          />
+        )}
+        <button
+          onClick={onClose}
+          className="absolute top-2 left-2 text-gray-400 hover:text-white p-1"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <div className="absolute bottom-2 left-4 right-28">
+          <h3 className="text-white font-black text-lg leading-tight">{node.name}</h3>
+          <p className="text-yellow-400 text-sm font-mono">{node.year}</p>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 space-y-3">
+        {/* Director & Country */}
+        <div className="flex items-center gap-2 text-sm">
+          <span className="text-gray-400">Director:</span>
+          <span className="text-white font-medium">{node.director || 'Unknown'}</span>
+        </div>
+
+        {/* Rating & Runtime */}
+        <div className="flex items-center gap-4">
+          {node.rating && (
+            <div className="flex items-center gap-1">
+              <span className="text-yellow-400">★</span>
+              <span className="text-white font-bold">{node.rating.toFixed(1)}</span>
+              <span className="text-gray-500 text-xs">/10</span>
+            </div>
+          )}
+          {node.runtime && (
+            <div className="text-gray-300 text-sm">
+              {formatRuntime(node.runtime)}
+            </div>
+          )}
+        </div>
+
+        {/* Overview */}
+        {node.overview && (
+          <p className="text-gray-400 text-xs leading-relaxed line-clamp-3">
+            {node.overview}
+          </p>
+        )}
+
+        {/* Genres */}
+        {node.genres && node.genres.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {node.genres.slice(0, 4).map((genre, i) => (
+              <span
+                key={i}
+                className="px-2 py-0.5 bg-gray-800 text-gray-300 text-[10px] uppercase rounded"
+              >
+                {genre}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* External Links */}
+        <div className="flex gap-2 pt-2 border-t border-gray-800">
+          {node.trailerUrl && (
+            <a
+              href={node.trailerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white text-xs font-bold uppercase text-center rounded transition-colors"
+            >
+              ▶ Trailer
+            </a>
+          )}
+          {node.imdbId && (
+            <a
+              href={`https://www.imdb.com/title/${node.imdbId}/`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2 px-3 bg-yellow-500 hover:bg-yellow-400 text-black text-xs font-bold uppercase text-center rounded transition-colors"
+            >
+              IMDb
+            </a>
+          )}
+          {node.tmdbId && (
+            <a
+              href={`https://www.themoviedb.org/movie/${node.tmdbId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase text-center rounded transition-colors"
+            >
+              TMDB
+            </a>
+          )}
+        </div>
+
+        {/* Influence Info */}
+        {(node.influencedBy && node.influencedBy.length > 0) || (node.influences && node.influences.length > 0) ? (
+          <div className="pt-2 border-t border-gray-800 text-xs">
+            {node.influencedBy && node.influencedBy.length > 0 && (
+              <div className="mb-2">
+                <span className="text-gray-500 uppercase text-[10px]">Influenced by: </span>
+                <span className="text-gray-300">{node.influencedBy.slice(0, 3).join(', ')}</span>
+              </div>
+            )}
+            {node.influences && node.influences.length > 0 && (
+              <div>
+                <span className="text-gray-500 uppercase text-[10px]">Influenced: </span>
+                <span className="text-gray-300">{node.influences.slice(0, 3).join(', ')}</span>
+              </div>
+            )}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
 
 // --- Components ---
 
@@ -26,11 +171,25 @@ const ControlPanel = ({
     setLineOpacity,
     yearRange,
     setYearRange,
-    resetFilters
+    resetFilters,
+    selectedDirectors,
+    setSelectedDirectors
 }: any) => {
   const [isOpen, setIsOpen] = useState(true); // Default open on desktop
   const [activeTab, setActiveTab] = useState<'controls' | 'filters'>('controls');
   const categories = Object.keys(COLOR_PALETTE).slice(0, 15);
+
+  // Get unique directors from the dataset
+  const allDirectors = useMemo(() => {
+    const directors = new Set<string>();
+    INITIAL_GRAPH_DATA.nodes.forEach(node => {
+      if (node.director) {
+        // Handle multiple directors separated by '|'
+        node.director.split('|').forEach(dir => directors.add(dir.trim()));
+      }
+    });
+    return Array.from(directors).sort();
+  }, []);
 
   const toggleFilter = (cat: string) => {
     setFilters((prev: any) => ({
@@ -255,6 +414,43 @@ const ControlPanel = ({
                             <button onClick={resetFilters} className="flex-1 py-2 bg-gray-800 hover:bg-gray-700 text-xs text-white uppercase tracking-wider font-bold">Reset</button>
                         </div>
 
+                        {/* Director Filter */}
+                        <div className="py-4 border-b border-gray-800">
+                            <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-3">Directors</h4>
+                            <div className="max-h-32 overflow-y-auto custom-scrollbar space-y-1">
+                                {allDirectors.map(director => {
+                                    const isSelected = selectedDirectors.includes(director);
+                                    return (
+                                        <button
+                                            key={director}
+                                            onClick={() => {
+                                                setSelectedDirectors(prev =>
+                                                    isSelected
+                                                        ? prev.filter(d => d !== director)
+                                                        : [...prev, director]
+                                                );
+                                            }}
+                                            className={`w-full text-left px-3 py-1.5 text-[9px] font-mono uppercase transition-colors ${
+                                                isSelected
+                                                    ? 'bg-yellow-400 text-black'
+                                                    : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                                            }`}
+                                        >
+                                            {director}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            {selectedDirectors.length > 0 && (
+                                <button
+                                    onClick={() => setSelectedDirectors([])}
+                                    className="mt-2 w-full py-1 bg-red-600 hover:bg-red-500 text-[9px] text-white uppercase font-bold"
+                                >
+                                    Clear Directors
+                                </button>
+                            )}
+                        </div>
+
                         {/* Decade Filter */}
                         <div className="py-4 border-b border-gray-800">
                             <h4 className="text-[10px] font-bold text-gray-400 uppercase mb-3">Era: {yearRange[0]} - {yearRange[1]}</h4>
@@ -307,7 +503,7 @@ const ControlPanel = ({
                                     </div>
                                     <button 
                                         onClick={(e) => { e.stopPropagation(); selectOnly(cat); }}
-                                        className="opacity-0 group-hover:opacity-100 text-[9px] bg-gray-700 hover:bg-white hover:text-black text-white px-2 py-1 uppercase font-bold tracking-wider transition-all"
+                                        className="opacity-0 group-hover:opacity-100 text-[9px] bg-gray-700 hover:bg-white hover:text-black px-2 py-1 uppercase font-bold tracking-wider transition-all"
                                     >
                                         Only
                                     </button>
@@ -322,402 +518,257 @@ const ControlPanel = ({
   );
 };
 
-const DetailsPanel = ({ node, onClose, onNodeLinkClick }: { node: NodeData | null, onClose: () => void, onNodeLinkClick: (name: string) => void }) => {
-  if (!node) return null;
-
-  return (
-    <div className="absolute top-0 md:top-4 right-0 md:right-4 w-full md:w-[400px] h-full md:h-auto md:max-h-[90vh] bg-black border-l md:border border-gray-800 md:rounded-lg z-30 overflow-hidden shadow-2xl animate-fade-in-right flex flex-col">
-      <div className="relative h-96 shrink-0 bg-gray-900 overflow-hidden group border-b-4 border-yellow-400">
-        {node.posterUrl ? (
-            <img src={node.posterUrl} alt={node.name} className="w-full h-full object-cover object-top opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
-        ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
-                <span className="text-gray-600 text-4xl font-bold opacity-30 font-mono">NO IMAGE</span>
-            </div>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-        
-        <div className="absolute bottom-0 left-0 p-6 w-full">
-            <h1 className="text-4xl font-black text-white mb-2 leading-none uppercase tracking-tighter drop-shadow-lg">{node.name}</h1>
-            <div className="flex items-center gap-3 text-sm font-mono font-bold tracking-widest text-yellow-400">
-                <span>{node.year}</span>
-                <span className="text-gray-500">|</span>
-                <span>{node.director?.split('|')[0]}</span>
-            </div>
-        </div>
-
-        <button 
-            className="absolute top-4 right-4 bg-black/50 hover:bg-red-600 text-white rounded-full p-2 transition-colors backdrop-blur-sm border border-white/20"
-            onClick={onClose}
-        >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-        </button>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-black">
-        <div className="mb-8 flex flex-wrap gap-2">
-            <span className="px-2 py-1 bg-white text-black text-[10px] font-black uppercase tracking-wider">
-                {node.country?.split('|')[0] || "UNKNOWN"}
-            </span>
-            {node.genres?.slice(0, 3).map(g => (
-                <span key={g} className="px-2 py-1 border border-gray-700 text-gray-300 text-[10px] font-bold uppercase tracking-wider">
-                    {g}
-                </span>
-            ))}
-        </div>
-
-        {node.influenceNotes && (
-            <div className="mb-8 p-5 bg-gray-900 border border-gray-800 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-1 h-full bg-yellow-400"></div>
-                <h4 className="text-[10px] uppercase tracking-[0.2em] text-yellow-500 mb-2 font-bold">The Connection</h4>
-                <p className="text-gray-100 text-sm font-serif italic leading-relaxed opacity-90">"{node.influenceNotes}"</p>
-            </div>
-        )}
-
-        <div className="grid grid-cols-1 gap-8">
-            {node.influencedBy && node.influencedBy.length > 0 && (
-                <div>
-                    <h4 className="text-xs uppercase tracking-widest text-red-500 mb-4 font-bold border-b border-gray-800 pb-2">Influenced By</h4>
-                    <div className="flex flex-col gap-2">
-                        {node.influencedBy.map((item, i) => (
-                            <button 
-                                key={i} 
-                                onClick={() => onNodeLinkClick(item)}
-                                className="text-left text-gray-400 hover:text-white hover:bg-gray-900 p-2 text-sm transition-colors border-l-2 border-transparent hover:border-yellow-400"
-                            >
-                                {item}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-            
-            {node.influences && node.influences.length > 0 && (
-                <div>
-                    <h4 className="text-xs uppercase tracking-widest text-red-500 mb-4 font-bold border-b border-gray-800 pb-2">Influences</h4>
-                    <div className="flex flex-col gap-2">
-                        {node.influences.map((item, i) => (
-                            <button 
-                                key={i} 
-                                onClick={() => onNodeLinkClick(item)}
-                                className="text-left text-gray-400 hover:text-white hover:bg-gray-900 p-2 text-sm transition-colors border-l-2 border-transparent hover:border-yellow-400"
-                            >
-                                {item}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Legend = ({ onHighlight, showLegend }: { onHighlight: (cat: string | null) => void, showLegend: boolean }) => {
-  const [expanded, setExpanded] = useState(false);
-  const categories = Object.entries(COLOR_PALETTE);
-  // On mobile show fewer
-  const displayCats = expanded ? categories : categories.slice(0, 6);
-
-  if (!showLegend) return null;
-
-  return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center z-10 pointer-events-none w-full px-4">
-      <div className="flex flex-wrap justify-center gap-2 pointer-events-auto bg-black border border-gray-800 p-4 shadow-2xl max-w-4xl">
-        {displayCats.map(([cat, color]) => (
-          <div 
-            key={cat} 
-            className="flex items-center space-x-2 bg-gray-900 hover:bg-gray-800 px-3 py-1.5 border border-gray-700 hover:border-yellow-400 transition-all cursor-pointer group"
-            onMouseEnter={() => onHighlight(cat)}
-            onMouseLeave={() => onHighlight(null)}
-          >
-            <div className="w-3 h-3" style={{ backgroundColor: color }}></div>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-white">{cat.replace(/-/g, ' ')}</span>
-          </div>
-        ))}
-        
-        {categories.length > 6 && (
-            <button 
-                onClick={() => setExpanded(!expanded)}
-                className="px-4 py-1.5 bg-yellow-400 hover:bg-yellow-300 text-[10px] font-black text-black uppercase tracking-wider"
-            >
-                {expanded ? '-' : '+'}
-            </button>
-        )}
-      </div>
-    </div>
-  );
-};
-
 // --- Main App Component ---
 
 const App = () => {
-  const fgRef = useRef<any>(null);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('App component mounted');
-    console.log('Color palette:', COLOR_PALETTE);
-    console.log('Initial graph data nodes:', INITIAL_GRAPH_DATA.nodes.length);
-    console.log('Initial graph data links:', INITIAL_GRAPH_DATA.links.length);
-  }, []);
-
-  // States
-  const [filters, setFilters] = useState({
-    subclouds: Object.keys(COLOR_PALETTE)
-  });
-  const [yearRange, setYearRange] = useState([1940, 2025]);
-  const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
-  const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [introComplete, setIntroComplete] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'3d' | '2d' | 'timeline'>('3d');
   const [showPosters, setShowPosters] = useState(true);
   const [showLegend, setShowLegend] = useState(true);
   const [posterScale, setPosterScale] = useState(1.0);
-  const [lineOpacity, setLineOpacity] = useState(0.15); // Low default for less clutter
+  const [lineOpacity, setLineOpacity] = useState(0.3);
+  const [yearRange, setYearRange] = useState<[number, number]>([1940, 2025]);
+  const [selectedDirectors, setSelectedDirectors] = useState<string[]>([]);
+  const [filters, setFilters] = useState({
+    subclouds: Object.keys(COLOR_PALETTE),
+  });
+  const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
+  const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
+  const [neighbors, setNeighbors] = useState<Set<string>>(new Set());
+  const [graphRef, setGraphRef] = useState<any>(null);
 
-  // Intro Animation State
-  const [introYear, setIntroYear] = useState(1940);
-  const [introComplete, setIntroComplete] = useState(false);
-
-  // Intro Animation Effect
+  // Complete intro after a short delay
   useEffect(() => {
-    // Only run once on mount
-    const interval = setInterval(() => {
-        setIntroYear(prev => {
-            if (prev >= 2025) {
-                clearInterval(interval);
-                setIntroComplete(true);
-                return 2025;
-            }
-            // Speed up as we go
-            const increment = prev < 1970 ? 1 : (prev < 2000 ? 2 : 3);
-            return prev + increment;
-        });
-    }, 50);
-
-    return () => clearInterval(interval);
+    const timer = setTimeout(() => setIntroComplete(true), 100);
+    return () => clearTimeout(timer);
   }, []);
 
-  // Filter Reset Logic
-  const resetFilters = () => {
-      setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-      setYearRange([1940, 2025]);
-  };
-
-  // Preset Logic - Enhanced for all Tarantino films
-  const applyPreset = (preset: string) => {
-      setSelectedNode(null);
-      resetFilters();
-
-      // Tarantino Film Presets - filter by tarantino_connection or find central node
-      const tarantinoFilms: Record<string, { subclouds: string[], searchTerm?: string }> = {
-          'reservoir-dogs': { subclouds: ['heist', 'crime', 'noir', 'hong-kong-action', 'heroic-bloodshed', 'neo-noir'], searchTerm: 'reservoir dogs' },
-          'pulp-fiction': { subclouds: ['crime', 'noir', 'neo-noir', 'french-new-wave', 'anthology'], searchTerm: 'pulp fiction' },
-          'jackie-brown': { subclouds: ['blaxploitation', 'crime', 'noir'], searchTerm: 'jackie brown' },
-          'death-proof': { subclouds: ['car-chase', 'exploitation', 'grindhouse', '70s-cinema'], searchTerm: 'death proof' },
-          'inglourious-basterds': { subclouds: ['wwii', 'war', 'men-on-mission', 'spaghetti-western'], searchTerm: 'inglourious basterds' },
-          'django-unchained': { subclouds: ['spaghetti-western', 'western', 'revisionist'], searchTerm: 'django unchained' },
-          'hateful-eight': { subclouds: ['western', 'spaghetti-western', 'revisionist'], searchTerm: 'hateful eight' },
-          'hollywood': { subclouds: ['70s-cinema', 'western', 'crime'], searchTerm: 'once upon a time in hollywood' },
-      };
-
-      if (preset === 'all') {
-          handleResetCamera();
-      } else if (preset === 'kb-influences') {
-          const kb1 = INITIAL_GRAPH_DATA.nodes.find(n => n.id.includes('kill-bill-vol-1'));
-          if (kb1) handleNodeClick(kb1);
-      } else if (tarantinoFilms[preset]) {
-          const config = tarantinoFilms[preset];
-          setFilters({ subclouds: config.subclouds });
-          // Try to find and focus on the Tarantino film itself
-          if (config.searchTerm) {
-              const centralNode = INITIAL_GRAPH_DATA.nodes.find(n =>
-                  n.name.toLowerCase().includes(config.searchTerm!)
-              );
-              if (centralNode) {
-                  setTimeout(() => handleNodeClick(centralNode), 500);
-              } else {
-                  handleResetCamera();
-              }
-          } else {
-              handleResetCamera();
-          }
-      } else if (preset === 'anime') {
-          setFilters({ subclouds: ['anime', 'anime-influenced', 'sci-fi-action'] });
-          handleResetCamera();
-      } else if (preset === 'western') {
-          setFilters({ subclouds: ['western', 'spaghetti-western', 'revisionist'] });
-          handleResetCamera();
-      } else if (preset === 'exploitation') {
-          setFilters({ subclouds: ['exploitation', 'grindhouse', 'neo-grindhouse', 'blaxploitation'] });
-          handleResetCamera();
-      } else if (preset === 'femme') {
-          setFilters({ subclouds: ['female-action', 'female-lead', 'female-ensemble', 'revenge', 'modern-revenge'] });
-          handleResetCamera();
-      } else if (preset === 'crime') {
-          setFilters({ subclouds: ['crime', 'noir', 'film-noir', 'neo-noir', 'heist', 'yakuza', 'action'] });
-          handleResetCamera();
-      } else if (preset === 'hong-kong') {
-          setFilters({ subclouds: ['hong-kong-action', 'heroic-bloodshed', 'kung-fu', 'wuxia'] });
-          handleResetCamera();
-      } else if (preset === 'wwii') {
-          setFilters({ subclouds: ['wwii', 'war', 'men-on-mission'] });
-          handleResetCamera();
-      }
-  };
-
-  // Process data based on filters AND intro animation
+  // Filtered data based on current filters
   const filteredData = useMemo(() => {
-    // 1. Filter by Intro Animation (Year)
-    let activeNodes = INITIAL_GRAPH_DATA.nodes;
-    if (!introComplete) {
-        activeNodes = activeNodes.filter(n => n.year <= introYear);
-    }
+    let nodes = INITIAL_GRAPH_DATA.nodes;
+    let links = INITIAL_GRAPH_DATA.links;
 
-    // 2. Filter by Year Range (Slider)
-    activeNodes = activeNodes.filter(n => n.year >= yearRange[0] && n.year <= yearRange[1]);
-
-    // 3. Filter by Subclouds
-    activeNodes = activeNodes.filter(node =>
-      node.subclouds.some(sc => filters.subclouds.includes(sc))
-    );
-
-    const activeNodeIds = new Set(activeNodes.map(n => n.id));
-
-    // 4. Filter links
-    const activeLinks = INITIAL_GRAPH_DATA.links.filter(link => {
-        const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
-        const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
-        return activeNodeIds.has(sourceId) && activeNodeIds.has(targetId);
+    // Filter by year range
+    nodes = nodes.filter(node => {
+      const year = node.year;
+      return year >= yearRange[0] && year <= yearRange[1];
     });
 
-    return { nodes: activeNodes, links: activeLinks };
-  }, [filters, introYear, introComplete, yearRange]);
-
-  // Add a small delay before showing the graph to prevent Three.js initialization issues
-  const [graphReady, setGraphReady] = useState(false);
-  useEffect(() => {
-    if (introComplete && filteredData.nodes.length > 0) {
-      const timer = setTimeout(() => setGraphReady(true), 100);
-      return () => clearTimeout(timer);
-    } else {
-      setGraphReady(false);
-    }
-  }, [introComplete, filteredData.nodes.length]);
-
-  // Determine neighbors for focus mode
-  const neighbors = useMemo(() => {
-      const set = new Set<string>();
-      if (!selectedNode) return set;
-
-      set.add(selectedNode.id);
-      INITIAL_GRAPH_DATA.links.forEach(link => {
-          const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
-          const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
-          
-          if (sourceId === selectedNode.id) set.add(targetId as string);
-          if (targetId === selectedNode.id) set.add(sourceId as string);
+    // Filter by directors
+    if (selectedDirectors.length > 0) {
+      nodes = nodes.filter(node => {
+        if (!node.director) return false;
+        return selectedDirectors.some(dir =>
+          node.director!.toLowerCase().includes(dir.toLowerCase())
+        );
       });
-      return set;
-  }, [selectedNode]);
+    }
 
-  const handleNodeClick = useCallback((node: NodeData) => {
-    setSelectedNode(node);
+    // Filter by subclouds
+    nodes = nodes.filter(node =>
+      node.subclouds.some(subcloud => filters.subclouds.includes(subcloud))
+    );
+
+    // Update links to only include filtered nodes
+    const nodeIds = new Set(nodes.map(n => n.id));
+    links = links.filter(link => {
+      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+      return nodeIds.has(sourceId) && nodeIds.has(targetId);
+    });
+
+    return { nodes, links };
+  }, [filters, yearRange, selectedDirectors]);
+
+  const handleSearch = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    // Search functionality can be implemented later
+    console.log('Searching for:', searchQuery);
+  }, [searchQuery]);
+
+  const applyPreset = useCallback((preset: string) => {
+    switch (preset) {
+      case 'all':
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors([]);
+        setHighlightedCategory(null);
+        break;
+      case 'kb-influences':
+        // Kill Bill influences - highlight Tarantino's Kill Bill films
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors([]);
+        setHighlightedCategory('kill-bill-core');
+        break;
+      case 'reservoir-dogs':
+        // Highlight Reservoir Dogs specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'pulp-fiction':
+        // Highlight Pulp Fiction specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'jackie-brown':
+        // Highlight Jackie Brown specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'death-proof':
+        // Highlight Death Proof specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'inglourious-basterds':
+        // Highlight Inglourious Basterds specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'django-unchained':
+        // Highlight Django Unchained specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'hateful-eight':
+        // Highlight The Hateful Eight specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'hollywood':
+        // Highlight Hollywood specifically
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors(['Quentin Tarantino']);
+        setHighlightedCategory(null);
+        break;
+      case 'western':
+        setFilters({ subclouds: ['western'] });
+        setHighlightedCategory(null);
+        break;
+      case 'crime':
+        setFilters({ subclouds: ['crime', 'noir', 'neo-noir'] });
+        setHighlightedCategory(null);
+        break;
+      case 'exploitation':
+        setFilters({ subclouds: ['exploitation'] });
+        setHighlightedCategory(null);
+        break;
+      case 'femme':
+        setFilters({ subclouds: ['femme-fatale'] });
+        setHighlightedCategory(null);
+        break;
+      case 'anime':
+        setFilters({ subclouds: ['anime'] });
+        setHighlightedCategory(null);
+        break;
+      case 'hong-kong':
+        setFilters({ subclouds: ['hong-kong-action'] });
+        setHighlightedCategory(null);
+        break;
+      case 'wwii':
+        setFilters({ subclouds: ['wwii'] });
+        setHighlightedCategory(null);
+        break;
+      default:
+        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+        setYearRange([1940, 2025]);
+        setSelectedDirectors([]);
+        setHighlightedCategory(null);
+    }
   }, []);
 
-  const handleNodeLinkClick = (name: string) => {
-      const targetNode = INITIAL_GRAPH_DATA.nodes.find(n => 
-          n.name.toLowerCase() === name.toLowerCase() || 
-          n.fullTitle?.toLowerCase() === name.toLowerCase() ||
-          name.toLowerCase().includes(n.name.toLowerCase()) 
-      );
+  const resetFilters = useCallback(() => {
+    setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
+    setYearRange([1940, 2025]);
+    setSelectedDirectors([]);
+    setSearchQuery('');
+  }, []);
 
-      if (targetNode) {
-          handleNodeClick(targetNode);
-          if (fgRef.current) {
-              const dist = viewMode === '2d' ? 200 : 100;
-              const newPos = {
-                  x: targetNode.x || 0,
-                  y: targetNode.y || 0,
-                  z: (targetNode.z || 0) + dist
-              };
-              fgRef.current.cameraPosition(newPos, targetNode, 1000);
-          }
+  const resetCamera = useCallback(() => {
+    // Camera reset logic would be implemented in Graph component
+    window.location.reload(); // Temporary solution
+  }, []);
+
+  const onNodeClick = useCallback((node: NodeData) => {
+    setSelectedNode(node);
+
+    // Find neighbors
+    const nodeNeighbors = new Set<string>();
+    filteredData.links.forEach(link => {
+      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
+      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
+
+      if (sourceId === node.id) {
+        nodeNeighbors.add(targetId);
+      } else if (targetId === node.id) {
+        nodeNeighbors.add(sourceId);
       }
-  };
+    });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const node = INITIAL_GRAPH_DATA.nodes.find(n => n.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    if (node) {
-      handleNodeClick(node);
-      if (fgRef.current) {
-        const dist = viewMode === '2d' ? 200 : 100;
-        const newPos = { x: node.x || 0, y: node.y || 0, z: (node.z || 0) + dist };
-        fgRef.current.cameraPosition(newPos, node, 1500);
-      }
-    }
-  };
-
-  const handleResetCamera = () => {
-    if (viewMode === 'timeline') {
-        fgRef.current?.cameraPosition({x: 0, y: 50, z: 900}, {x:0, y:0, z:0}, 1500);
-    } else if (viewMode === '2d') {
-        fgRef.current?.cameraPosition({ x: 0, y: 0, z: 700 }, { x: 0, y: 0, z: 0 }, 1500);
-    } else {
-        fgRef.current?.cameraPosition({ x: 0, y: 0, z: 600 }, { x: 0, y: 0, z: 0 }, 1500);
-    }
-    setSelectedNode(null);
-  };
+    setNeighbors(nodeNeighbors);
+    setHighlightedCategory(null); // Clear category highlighting when selecting a node
+  }, [filteredData.links]);
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden font-sans text-white selection:bg-yellow-400 selection:text-black">
-      
-      {/* Intro Overlay */}
+    <div className="w-full h-screen bg-black relative overflow-hidden">
+      {/* Loading Screen */}
       {!introComplete && (
-          <div className="absolute inset-0 pointer-events-none z-50 flex flex-col items-center justify-center bg-transparent">
-              <div className="text-[120px] font-black text-yellow-400 opacity-20 tracking-tighter tabular-nums animate-pulse">
-                  {introYear}
-              </div>
-          </div>
-      )}
-
-      {/* Graph Area */}
-      {introComplete ? (
-        <Graph
-          key="graph-ready"
-          data={filteredData}
-          onNodeClick={handleNodeClick}
-          graphRef={fgRef}
-          viewMode={viewMode}
-          showPosters={showPosters}
-          highlightedCategory={highlightedCategory}
-          selectedNode={selectedNode}
-          neighbors={neighbors}
-          posterScale={posterScale}
-          lineOpacity={lineOpacity}
-        />
-      ) : (
-        <div className="w-full h-screen bg-black text-white flex items-center justify-center">
+        <div className="absolute inset-0 bg-black flex items-center justify-center z-50">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Loading Graph Data...</h2>
-            <p className="text-gray-400">Building the Tarantino influence network...</p>
-            <div className="mt-4 text-xs text-gray-600">
-              <p>Data nodes: {filteredData.nodes.length}</p>
-              <p>Data links: {filteredData.links.length}</p>
-              <p>View mode: {viewMode}</p>
-              <p>Show posters: {showPosters ? 'true' : 'false'}</p>
-            </div>
+            <h1 className="text-yellow-400 text-4xl font-black font-mono mb-4">ALL ROADS TO KILL BILL</h1>
+            <div className="text-gray-400 text-lg">Loading Film Network...</div>
           </div>
         </div>
       )}
 
-      {/* Control Panel (Left Sidebar / Drawer) */}
-      <ControlPanel 
+      {/* Main Graph */}
+      <Suspense fallback={
+        <div className="absolute inset-0 bg-black flex items-center justify-center">
+          <div className="text-yellow-400 text-xl font-mono">Loading Graph...</div>
+        </div>
+      }>
+        {introComplete && (
+          <Graph
+            data={filteredData}
+            onNodeClick={onNodeClick}
+            graphRef={graphRef}
+            viewMode={viewMode}
+            showPosters={showPosters}
+            highlightedCategory={highlightedCategory}
+            selectedNode={selectedNode}
+            neighbors={neighbors}
+            showLegend={showLegend}
+            posterScale={posterScale}
+            lineOpacity={lineOpacity}
+          />
+        )}
+      </Suspense>
+
+      {/* Film Detail Panel */}
+      <FilmDetailPanel
+        node={selectedNode}
+        onClose={() => setSelectedNode(null)}
+      />
+
+      {/* Control Panel */}
+      <ControlPanel
         filters={filters}
         setFilters={setFilters}
         searchQuery={searchQuery}
@@ -727,7 +778,7 @@ const App = () => {
         setViewMode={setViewMode}
         showPosters={showPosters}
         setShowPosters={setShowPosters}
-        onResetCamera={handleResetCamera}
+        onResetCamera={resetCamera}
         applyPreset={applyPreset}
         showLegend={showLegend}
         setShowLegend={setShowLegend}
@@ -738,34 +789,17 @@ const App = () => {
         yearRange={yearRange}
         setYearRange={setYearRange}
         resetFilters={resetFilters}
+        selectedDirectors={selectedDirectors}
+        setSelectedDirectors={setSelectedDirectors}
       />
-      
-      {/* Floating Reset Button */}
-      <button 
-          onClick={handleResetCamera}
-          className="absolute bottom-24 right-4 md:bottom-8 md:right-8 bg-red-600 hover:bg-red-500 text-white rounded-full p-4 shadow-2xl z-20 transition-transform hover:scale-110 group border-2 border-black"
-          title="Reset View"
-      >
-          <svg className="w-6 h-6 group-hover:rotate-180 transition-transform duration-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-      </button>
-
-      {/* Details Panel (Right Sidebar) */}
-      <DetailsPanel 
-        node={selectedNode} 
-        onClose={() => setSelectedNode(null)} 
-        onNodeLinkClick={handleNodeLinkClick}
-      />
-      
-      {/* Bottom Legend */}
-      <Legend onHighlight={setHighlightedCategory} showLegend={showLegend} />
-
     </div>
   );
 };
 
-const root = createRoot(document.getElementById("root")!);
-root.render(<App />);
+// --- Render App ---
 
-export default App;
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<App />);
+}

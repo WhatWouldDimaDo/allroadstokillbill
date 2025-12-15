@@ -25,5 +25,12 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "./**/*"
+  ],
+  "exclude": [
+    "../01_Projects/Tarantino-Graph/data-export/**/*",
+    "../01_Projects/**/*"
+  ]
 }

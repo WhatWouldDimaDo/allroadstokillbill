@@ -15,6 +15,14 @@ export interface NodeData {
   influencedBy?: string[];
   influences?: string[];
   influenceCount?: number;
+  // Enriched TMDB fields
+  runtime?: number;
+  rating?: number;
+  imdbId?: string;
+  tmdbId?: number;
+  trailerUrl?: string;
+  overview?: string;
+  // Force graph positioning
   x?: number;
   y?: number;
   z?: number;
