@@ -3,6 +3,7 @@ import ForceGraph3D from 'react-force-graph-3d';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GraphData, NodeData } from '../types';
 import { createPosterNode, createGeometryNode } from '../utils/nodeHelpers';
+import { useTheme } from '../contexts/ThemeContext';
 import * as THREE from 'three';
 
 interface GraphProps {
@@ -117,6 +118,8 @@ const Graph: React.FC<GraphProps> = ({
   posterScale,
   lineOpacity
 }) => {
+  const { currentTheme } = useTheme();
+
   // Mobile detection and touch gesture support
   const [isMobile, setIsMobile] = useState(false);
 
@@ -143,11 +146,11 @@ const Graph: React.FC<GraphProps> = ({
     }
   }, [isMobile]);
 
-  // Blood particle systems for links
-  const bloodParticlesRef = useRef<Map<string, THREE.Points>>(new Map());
+  // Theme-based particle systems for links
+  const themeParticlesRef = useRef<Map<string, THREE.Points>>(new Map());
 
-  // Create blood particle system for a link
-  const createBloodParticles = useCallback((link: any) => {
+  // Create theme-based particle system for a link
+  const createThemeParticles = useCallback((link: any) => {
     const sourceNode = typeof link.source === 'object' ? link.source : data.nodes?.find(n => n.id === link.source);
     const targetNode = typeof link.target === 'object' ? link.target : data.nodes?.find(n => n.id === link.target);
 
@@ -233,17 +236,17 @@ const Graph: React.FC<GraphProps> = ({
 
     // Store reference for animation
     const linkId = `${sourceNode.id}-${targetNode.id}`;
-    bloodParticlesRef.current.set(linkId, particles);
+    themeParticlesRef.current.set(linkId, particles);
 
     return particles;
-  }, [data.nodes]);
+  }, [data.nodes, currentTheme]);
 
-  // Animate blood particles
+  // Animate theme particles
   useEffect(() => {
     const animateParticles = () => {
       const time = Date.now() * 0.001; // Convert to seconds
 
-      bloodParticlesRef.current.forEach((particles, linkId) => {
+      themeParticlesRef.current.forEach((particles, linkId) => {
         if (particles.material instanceof THREE.ShaderMaterial) {
           particles.material.uniforms.time.value = time;
         }
@@ -427,11 +430,11 @@ const Graph: React.FC<GraphProps> = ({
 
     // Only create particles for important connections to avoid performance issues
     if (shouldShowParticles) {
-      return createBloodParticles(link);
+      return createThemeParticles(link);
     }
 
     return null; // Use default link rendering
-  }, [selectedNode, neighbors, highlightedCategory, createBloodParticles]);
+  }, [selectedNode, neighbors, highlightedCategory, createThemeParticles]);
 
   return (
     <div className="w-full h-screen">

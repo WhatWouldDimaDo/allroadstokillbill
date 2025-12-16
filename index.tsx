@@ -4,6 +4,8 @@ import Fuse from 'fuse.js';
 import { INITIAL_GRAPH_DATA, COLOR_PALETTE } from "./graphData_final_with_posters";
 import { NodeData, Scene, SceneInfluence, InfluenceType, hasSceneData, getEnrichmentLevel } from "./types";
 import { GestureTutorial } from "./components/GestureTutorial";
+import { LoadingScreen } from "./components/LoadingScreen";
+import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 
 const Graph = lazy(() => import("./components/Graph"));
 
@@ -1084,8 +1086,11 @@ const TimelineAxis = ({ viewMode }: { viewMode: '3d' | '2d' | 'timeline' }) => {
 
 // --- Main App Component ---
 
-const App = () => {
+const AppContent = () => {
+  const { currentTheme, setThemeByFilm } = useTheme();
   const [introComplete, setIntroComplete] = useState(false);
+  const [showLoading, setShowLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<NodeData[]>([]);
   const [viewMode, setViewMode] = useState<'3d' | '2d' | 'timeline'>('3d');
@@ -1110,9 +1115,47 @@ const App = () => {
   });
   const graphRef = useRef<any>(null);
 
-  // Complete intro after a short delay
+  // Animate progress bar during loading (fills 0-100% over 500ms)
   useEffect(() => {
-    const timer = setTimeout(() => setIntroComplete(true), 100);
+    if (showLoading) {
+      const progressInterval = setInterval(() => {
+        setLoadingProgress(prev => {
+          if (prev >= 95) {
+            clearInterval(progressInterval);
+            return 100;
+          }
+          // Increment by ~2% every 10ms to reach ~100% in 500ms
+          return prev + 2;
+        });
+      }, 10);
+
+      return () => clearInterval(progressInterval);
+    }
+  }, [showLoading]);
+
+  // Complete intro with minimum 500ms duration
+  useEffect(() => {
+    const startTime = Date.now();
+    const MIN_LOADING_TIME = 500; // 500ms minimum display time
+
+    const timer = setTimeout(() => {
+      setIntroComplete(true);
+
+      // Calculate remaining time to hit the minimum duration
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, MIN_LOADING_TIME - elapsed);
+
+      // Set progress to 100% before hiding
+      setLoadingProgress(100);
+
+      // Hide loading screen after minimum duration
+      const hideTimer = setTimeout(() => {
+        setShowLoading(false);
+      }, remaining);
+
+      return () => clearTimeout(hideTimer);
+    }, 100);
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -1326,6 +1369,9 @@ const App = () => {
   const onNodeClick = useCallback((node: NodeData) => {
     setSelectedNode(node);
 
+    // Set theme based on selected film
+    setThemeByFilm(node.id);
+
     // Find neighbors
     const nodeNeighbors = new Set<string>();
     filteredData.links.forEach(link => {
@@ -1341,12 +1387,12 @@ const App = () => {
 
     setNeighbors(nodeNeighbors);
     setHighlightedCategory(null); // Clear category highlighting when selecting a node
-  }, [filteredData.links]);
+  }, [filteredData.links, setThemeByFilm]);
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
-      {/* Kill Bill Themed Loading Screen with Fade-Out Transition */}
-      <LoadingScreen show={showLoading} progress={loadingProgress} />
+      {/* Themed Loading Screen with Fade-Out Transition */}
+      <LoadingScreen show={showLoading} progress={loadingProgress} theme={currentTheme} />
 
       {/* Main Graph */}
       <Suspense fallback={
@@ -1487,6 +1533,12 @@ const App = () => {
 };
 
 // --- Render App ---
+
+const App = () => (
+  <ThemeProvider>
+    <AppContent />
+  </ThemeProvider>
+);
 
 const container = document.getElementById('root');
 if (container) {
