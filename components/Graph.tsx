@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GraphData, NodeData } from '../types';
@@ -17,6 +17,34 @@ interface GraphProps {
   posterScale: number;
   lineOpacity: number;
 }
+
+// TASK-010: INFLUENCE TYPE COLOR MAPPING
+const INFLUENCE_COLORS: Record<string, string> = {
+  'visual_style': '#FFD700',      // Gold - Visual influences
+  'narrative': '#FF6B35',          // Orange - Story influences
+  'character': '#4ECDC4',          // Teal - Character influences
+  'fight_choreography': '#FF0000', // Red - Action influences
+  'music': '#9B59B6',              // Purple - Musical influences
+  'themes': '#3498DB',             // Blue - Thematic influences
+  'default': '#FFFFFF'             // White - General influences
+};
+
+// Helper function to get influence color
+const getInfluenceColor = (influenceType: string | undefined): string => {
+  if (!influenceType) return INFLUENCE_COLORS['default'];
+  return INFLUENCE_COLORS[influenceType] || INFLUENCE_COLORS['default'];
+};
+
+// Helper function to get line width based on strength
+const getLineWidth = (strength: number | undefined, isActive: boolean): number => {
+  const baseWidth = strength && strength > 0.7 ? 4 : strength && strength > 0.5 ? 3 : 2;
+  return isActive ? baseWidth + 2 : baseWidth;
+};
+
+// Helper function to determine if line should be dashed
+const shouldBeDashed = (strength: number | undefined): boolean => {
+  return strength !== undefined && strength < 0.5;
+};
 
 // Subcloud cluster positions for better grouping - expanded for full Tarantino network
 const SUBCLOUD_CLUSTERS: Record<string, { x: number; y: number }> = {
@@ -407,9 +435,44 @@ const Graph: React.FC<GraphProps> = ({
 
   return (
     <div className="w-full h-screen">
+      {/* TASK-010 Step 6: Color Legend for Influence Types */}
+      <div className="fixed bottom-4 left-4 bg-black/90 backdrop-blur-sm border border-yellow-500/30 rounded-lg p-4 z-10 max-w-xs">
+        <h3 className="text-white text-sm font-bold mb-3">Influence Types</h3>
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 rounded-full" style={{ backgroundColor: INFLUENCE_COLORS['visual_style'], boxShadow: `0 0 8px ${INFLUENCE_COLORS['visual_style']}` }} />
+            <span className="text-xs text-white">Visual Style</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 rounded-full" style={{ backgroundColor: INFLUENCE_COLORS['narrative'], boxShadow: `0 0 8px ${INFLUENCE_COLORS['narrative']}` }} />
+            <span className="text-xs text-white">Narrative</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 rounded-full" style={{ backgroundColor: INFLUENCE_COLORS['character'], boxShadow: `0 0 8px ${INFLUENCE_COLORS['character']}` }} />
+            <span className="text-xs text-white">Character</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 rounded-full" style={{ backgroundColor: INFLUENCE_COLORS['fight_choreography'], boxShadow: `0 0 8px ${INFLUENCE_COLORS['fight_choreography']}` }} />
+            <span className="text-xs text-white">Fight Choreography</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 rounded-full" style={{ backgroundColor: INFLUENCE_COLORS['music'], boxShadow: `0 0 8px ${INFLUENCE_COLORS['music']}` }} />
+            <span className="text-xs text-white">Music</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-0.5 rounded-full" style={{ backgroundColor: INFLUENCE_COLORS['themes'], boxShadow: `0 0 8px ${INFLUENCE_COLORS['themes']}` }} />
+            <span className="text-xs text-white">Themes</span>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-yellow-500/30">
+          <p className="text-xs text-gray-400">Line width = strength</p>
+          <p className="text-xs text-gray-400">Dashed = weak influence</p>
+        </div>
+      </div>
+
       {/* Mobile Control Panel */}
       {isMobile && (
-        <div className="fixed bottom-4 left-4 right-4 bg-black/80 backdrop-blur-sm border border-yellow-500/30 rounded-lg p-4 z-10">
+        <div className="fixed bottom-4 right-4 bg-black/80 backdrop-blur-sm border border-yellow-500/30 rounded-lg p-4 z-10">
           <div className="grid grid-cols-3 gap-3">
             {/* Zoom controls */}
             <button
@@ -466,19 +529,20 @@ const Graph: React.FC<GraphProps> = ({
         showNavInfo={false}
 
         // Enable OrbitControls for touch gesture support
-        enableNodeDrag={false}
+        enableNodeDrag={true}
         enableNavigationControls={true}
         controlType="orbit"
 
         linkWidth={link => {
             const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
             const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
+            const strength = (link as any).strength || 0.5;
 
             if (selectedNode) {
                 const isConnected =
                     (sourceId === selectedNode.id && neighbors.has(targetId)) ||
                     (targetId === selectedNode.id && neighbors.has(sourceId));
-                return isConnected ? 6 : 0.5;
+                return isConnected ? getLineWidth(strength, true) + 2 : 0.5;
             }
 
             if (highlightedCategory) {
@@ -486,9 +550,10 @@ const Graph: React.FC<GraphProps> = ({
                 const target = link.target as NodeData;
                 const sMatch = source.subclouds && source.subclouds.includes(highlightedCategory);
                 const tMatch = target.subclouds && target.subclouds.includes(highlightedCategory);
-                return (sMatch && tMatch) ? 6 : 1;
+                return (sMatch && tMatch) ? getLineWidth(strength, true) : 1;
             }
-            return 3;
+            // TASK-010 Step 1: Increased thickness (1 → 3px based on strength)
+            return getLineWidth(strength, false);
         }}
 
         linkResolution={10}
@@ -497,13 +562,17 @@ const Graph: React.FC<GraphProps> = ({
            const sourceId = typeof link.source === 'object' ? (link.source as any).id : link.source;
            const targetId = typeof link.target === 'object' ? (link.target as any).id : link.target;
 
+           // TASK-010 Step 3: Get influence type for color-coding
+           const influenceType = (link as any).type || (link as any).influenceType;
+           const baseColor = getInfluenceColor(influenceType);
+
            // Selected Node Logic
            if (selectedNode) {
                 const isConnected =
                     (sourceId === selectedNode.id && neighbors.has(targetId)) ||
                     (targetId === selectedNode.id && neighbors.has(sourceId));
 
-                return isConnected ? '#FFD700' : 'rgba(50,50,50,0.05)';
+                return isConnected ? baseColor : 'rgba(50,50,50,0.05)';
            }
 
            // Category Highlight Logic
@@ -512,12 +581,17 @@ const Graph: React.FC<GraphProps> = ({
                const target = link.target as NodeData;
                const sourceMatch = source.subclouds && source.subclouds.includes(highlightedCategory);
                const targetMatch = target.subclouds && target.subclouds.includes(highlightedCategory);
-               return (sourceMatch && targetMatch) ? '#FFD700' : 'rgba(50,50,50,0.05)';
+               return (sourceMatch && targetMatch) ? baseColor : 'rgba(50,50,50,0.05)';
            }
 
            // Default Logic (No Selection)
-           // Use the user-defined opacity
-           return `rgba(255,255,255,${lineOpacity})`;
+           // TASK-010 Step 1 & 3: Increased opacity (0.3 → 0.7) + Color-coded by influence type
+           const hexColor = baseColor;
+           const rgb = parseInt(hexColor.slice(1), 16);
+           const r = (rgb >> 16) & 255;
+           const g = (rgb >> 8) & 255;
+           const b = rgb & 255;
+           return `rgba(${r},${g},${b},0.7)`;
         }}
 
         backgroundColor="#000000"

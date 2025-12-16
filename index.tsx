@@ -84,6 +84,17 @@ const OverviewTab = ({ node }: { node: NodeData }) => {
 
   return (
     <div className="space-y-4">
+      {/* Full-width Poster */}
+      {node.posterUrl && (
+        <div className="w-screen -ml-4 -mr-4 -mt-4 mb-4">
+          <img
+            src={node.posterUrl}
+            alt={node.name}
+            className="w-full h-auto object-cover"
+          />
+        </div>
+      )}
+
       {/* Tagline */}
       {node.tagline && (
         <div className="border-l-4 border-yellow-400 pl-3">
@@ -453,21 +464,21 @@ const FilmRelationCard = ({ filmName, filmData, type }: {
   filmData?: NodeData;
   type: 'source' | 'target';
 }) => (
-  <div className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-2 hover:bg-gray-800 transition-colors cursor-pointer">
+  <div className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-2 hover:bg-yellow-900/30 transition-colors cursor-pointer group">
     {filmData?.posterUrl && (
       <img
         src={filmData.posterUrl}
         alt={filmName}
-        className="w-10 h-14 object-cover rounded"
+        className="w-10 h-14 object-cover rounded group-hover:ring-2 group-hover:ring-yellow-400 transition-all"
       />
     )}
     <div className="flex-1 min-w-0">
-      <p className="text-white text-sm font-medium truncate">{filmName}</p>
+      <p className="text-yellow-400 text-sm font-medium truncate group-hover:text-yellow-300 transition-colors">{filmName}</p>
       {filmData && (
         <p className="text-gray-500 text-xs">{filmData.year} • {filmData.director}</p>
       )}
     </div>
-    <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className="w-4 h-4 text-yellow-400 group-hover:text-yellow-300 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
     </svg>
   </div>
@@ -523,7 +534,7 @@ const FilmDetailPanel = ({ node, onClose, onNavigateToFilm }: {
   if (!node) return null;
 
   return (
-    <div className="absolute bottom-4 right-4 w-96 md:w-[480px] bg-black/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl z-30 overflow-hidden max-h-[85vh] flex flex-col">
+    <div className="absolute bottom-4 right-4 w-full md:w-[600px] lg:w-[700px] xl:w-[800px] bg-black/95 backdrop-blur-xl border border-gray-700 rounded-xl shadow-2xl z-30 overflow-hidden max-h-[85vh] flex flex-col">
       {/* Header (keep existing poster thumbnail design) */}
       <FilmHeader node={node} onClose={onClose} />
 
@@ -1334,84 +1345,8 @@ const App = () => {
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
-      {/* Kill Bill Themed Loading Screen */}
-      {!introComplete && (
-        <div className="absolute inset-0 bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 flex items-center justify-center z-50 overflow-hidden">
-          {/* Animated blood splatters */}
-          <div className="absolute inset-0">
-            {[...Array(12)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute w-16 h-16 bg-red-600 rounded-full opacity-20 animate-ping"
-                style={{
-                  left: `${10 + (i * 7)}%`,
-                  top: `${20 + (i * 5)}%`,
-                  animationDelay: `${i * 0.1}s`,
-                  animationDuration: '2s',
-                  transform: `rotate(${i * 30}deg) scale(${0.5 + (i % 3) * 0.3})`
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Sword slash animation */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-2 h-64 bg-gradient-to-b from-transparent via-black to-transparent transform -rotate-12 animate-pulse opacity-30"
-                 style={{ animationDuration: '1.5s' }} />
-          </div>
-
-          {/* Main content */}
-          <div className="text-center z-10 relative">
-            {/* Animated title */}
-            <div className="mb-8">
-              <h1 className="text-black text-6xl md:text-8xl font-black font-mono tracking-wider animate-pulse">
-                ALL ROADS
-              </h1>
-              <h1 className="text-red-800 text-6xl md:text-8xl font-black font-mono tracking-wider animate-pulse"
-                  style={{ animationDelay: '0.3s' }}>
-                TO KILL BILL
-              </h1>
-            </div>
-
-            {/* Loading animation */}
-            <div className="mb-6">
-              <div className="flex justify-center items-center space-x-1">
-                {[...Array(5)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="w-3 h-3 bg-red-600 rounded-full animate-bounce"
-                    style={{
-                      animationDelay: `${i * 0.1}s`,
-                      animationDuration: '0.6s'
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Loading text with typewriter effect */}
-            <div className="text-black font-bold text-xl md:text-2xl font-mono tracking-wide">
-              <span className="animate-pulse">Loading Film Network</span>
-              <span className="animate-ping">.</span>
-              <span className="animate-ping" style={{ animationDelay: '0.2s' }}>.</span>
-              <span className="animate-ping" style={{ animationDelay: '0.4s' }}>.</span>
-            </div>
-
-            {/* Progress bar */}
-            <div className="mt-6 w-64 mx-auto">
-              <div className="bg-black/20 rounded-full h-2">
-                <div className="bg-red-600 h-2 rounded-full animate-pulse"
-                     style={{ width: '60%', animationDuration: '1.5s' }} />
-              </div>
-            </div>
-          </div>
-
-          {/* Corner blood drips */}
-          <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-red-600/30 to-transparent" />
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-600/10 rounded-full blur-xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-red-600/15 rounded-full blur-lg" />
-        </div>
-      )}
+      {/* Kill Bill Themed Loading Screen with Fade-Out Transition */}
+      <LoadingScreen show={showLoading} progress={loadingProgress} />
 
       {/* Main Graph */}
       <Suspense fallback={
