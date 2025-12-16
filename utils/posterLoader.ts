@@ -30,6 +30,25 @@ class PosterLoader {
     this.loadCacheFromStorage();
   }
 
+  async getThumbnailUrl(filmId: string, title: string, year: number): Promise<string | null> {
+    // Try to load from local thumbnails in public directory
+    const possibleThumbUrls = this.getLocalThumbnailUrls(filmId, title);
+    for (const thumbUrl of possibleThumbUrls) {
+      try {
+        const response = await fetch(thumbUrl);
+        if (response.ok) {
+          console.log(`Using local thumbnail for ${title}:`, thumbUrl);
+          return thumbUrl;
+        }
+      } catch (error) {
+        // Continue to next possible URL
+      }
+    }
+
+    // No thumbnail available
+    return null;
+  }
+
   async getPosterUrl(filmId: string, title: string, year: number): Promise<string> {
     // Check memory cache first
     const cached = this.cache[filmId];
@@ -174,6 +193,20 @@ class PosterLoader {
     return possibleNames.map(name => `/${name}`);
   }
 
+  private getLocalThumbnailUrls(filmId: string, title: string): string[] {
+    // Try to find thumbnail in thumbs directory
+    const possibleThumbNames = [
+      `thumbs/${filmId}_thumb.jpg`,
+      `thumbs/${filmId.replace(/-/g, '_')}_thumb.jpg`, // Convert hyphens to underscores
+      `thumbs/${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}_thumb.jpg`,
+      `thumbs/${title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-')}_thumb.jpg`,
+      `thumbs/${title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}_thumb.jpg` // Underscore version
+    ];
+
+    // Thumbnails are served from the public directory
+    return possibleThumbNames.map(name => `/${name}`);
+  }
+
   private loadCacheFromStorage(): void {
     try {
       // Check if localStorage is available (browser environment)
@@ -258,32 +291,43 @@ export const getPosterLoader = (): PosterLoader => {
 // Export for convenience
 export const posterLoader = getPosterLoader();
 
-// Utility function for React components
+// Utility function for React components with progressive loading
 export const usePoster = (filmId: string, title: string, year: number) => {
+  const [thumbUrl, setThumbUrl] = useState<string>('');
   const [posterUrl, setPosterUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
 
-    posterLoader.getPosterUrl(filmId, title, year)
-      .then(url => {
+    const loadPoster = async () => {
+      try {
+        // First, try to load thumbnail for progressive loading
+        const thumbResult = await posterLoader.getThumbnailUrl(filmId, title, year);
+        if (mounted && thumbResult) {
+          setThumbUrl(thumbResult);
+        }
+
+        // Then load the full poster
+        const fullPosterUrl = await posterLoader.getPosterUrl(filmId, title, year);
         if (mounted) {
-          setPosterUrl(url);
+          setPosterUrl(fullPosterUrl);
           setLoading(false);
         }
-      })
-      .catch(error => {
+      } catch (error) {
         console.warn('Poster loading failed:', error);
         if (mounted) {
           setLoading(false);
         }
-      });
+      }
+    };
+
+    loadPoster();
 
     return () => {
       mounted = false;
     };
   }, [filmId, title, year]);
 
-  return { posterUrl, loading };
+  return { thumbUrl, posterUrl, loading };
 };

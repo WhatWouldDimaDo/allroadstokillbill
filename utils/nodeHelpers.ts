@@ -207,14 +207,14 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
   const contentMaterial = new THREE.SpriteMaterial({
     map: placeholderTexture,
     transparent: true,
-    opacity: opacity,
+    opacity: 0, // Start invisible for smooth fade-in
     depthWrite: false,
     depthTest: true
   });
-  
+
   if (grayscale) {
       // Tint it grey
-      contentMaterial.color.setHex(0x555555); 
+      contentMaterial.color.setHex(0x555555);
   }
 
   // Load poster using the dynamic poster loader
@@ -241,18 +241,73 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
             }
             contentMaterial.map = loadedTex;
             contentMaterial.needsUpdate = true;
+
+            // Smooth fade-in animation
+            const startOpacity = opacity;
+            const fadeIn = () => {
+              const currentOpacity = contentMaterial.opacity;
+              const targetOpacity = startOpacity;
+              const increment = 0.05;
+
+              if (currentOpacity < targetOpacity) {
+                contentMaterial.opacity = Math.min(targetOpacity, currentOpacity + increment);
+                contentMaterial.needsUpdate = true;
+                requestAnimationFrame(fadeIn);
+              }
+            };
+            fadeIn();
+
             console.log(`Successfully loaded poster for ${node.name}:`, posterUrl);
           },
           undefined,
           (error) => {
             console.warn(`Failed to load poster texture for ${node.name}:`, error, posterUrl);
+            // Fade in placeholder if poster fails to load
+            const fadeIn = () => {
+              const currentOpacity = contentMaterial.opacity;
+              const targetOpacity = opacity;
+              const increment = 0.05;
+
+              if (currentOpacity < targetOpacity) {
+                contentMaterial.opacity = Math.min(targetOpacity, currentOpacity + increment);
+                contentMaterial.needsUpdate = true;
+                requestAnimationFrame(fadeIn);
+              }
+            };
+            fadeIn();
           }
         );
       } else {
         console.log(`No poster URL available for ${node.name}`);
+        // Fade in placeholder immediately
+        const fadeIn = () => {
+          const currentOpacity = contentMaterial.opacity;
+          const targetOpacity = opacity;
+          const increment = 0.05;
+
+          if (currentOpacity < targetOpacity) {
+            contentMaterial.opacity = Math.min(targetOpacity, currentOpacity + increment);
+            contentMaterial.needsUpdate = true;
+            requestAnimationFrame(fadeIn);
+          }
+        };
+        fadeIn();
       }
     } catch (error) {
       console.warn(`Failed to get poster URL for ${node.name}:`, error);
+      // Fade in placeholder on error
+      const fadeIn = () => {
+        const currentOpacity = contentMaterial.opacity;
+        const targetOpacity = opacity;
+        const increment = 0.05;
+
+        if (currentOpacity < targetOpacity) {
+          contentMaterial.opacity = Math.min(targetOpacity, currentOpacity + increment);
+          contentMaterial.needsUpdate = true;
+          requestAnimationFrame(fadeIn);
+        }
+      };
+      fadeIn();
     }
   };
 

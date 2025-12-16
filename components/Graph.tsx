@@ -149,7 +149,21 @@ const Graph: React.FC<GraphProps> = ({
   // Theme-based particle systems for links
   const themeParticlesRef = useRef<Map<string, THREE.Points>>(new Map());
 
-  // Create theme-based particle system for a link
+  // Poster preloading system
+  const preloadedPostersRef = useRef<Set<string>>(new Set());
+
+  // Preload posters for visible nodes
+  const preloadPosters = useCallback((nodes: any[]) => {
+    nodes.forEach(node => {
+      if (!preloadedPostersRef.current.has(node.id)) {
+        const img = new Image();
+        img.src = `/posters/${node.id}.jpg`;
+        preloadedPostersRef.current.add(node.id);
+      }
+    });
+  }, []);
+
+  // Poster preloading system
   const createThemeParticles = useCallback((link: any) => {
     const sourceNode = typeof link.source === 'object' ? link.source : data.nodes?.find(n => n.id === link.source);
     const targetNode = typeof link.target === 'object' ? link.target : data.nodes?.find(n => n.id === link.target);
@@ -275,6 +289,14 @@ const Graph: React.FC<GraphProps> = ({
 
     return () => cancelAnimationFrame(animationFrame);
   }, []);
+
+  // Poster preloading when data changes
+  useEffect(() => {
+    if (data.nodes && showPosters) {
+      // Preload posters for all nodes (they're small files, so preload all)
+      preloadPosters(data.nodes);
+    }
+  }, [data.nodes, showPosters, preloadPosters]);
 
   // Debug logging
   useEffect(() => {

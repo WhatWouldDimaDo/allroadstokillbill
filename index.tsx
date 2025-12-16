@@ -466,21 +466,23 @@ const FilmRelationCard = ({ filmName, filmData, type }: {
   filmData?: NodeData;
   type: 'source' | 'target';
 }) => (
-  <div className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-2 hover:bg-yellow-900/30 transition-colors cursor-pointer group">
+  <div className="flex items-center gap-3 bg-gray-800/50 rounded-lg p-3 hover:bg-yellow-900/30 transition-all duration-200 cursor-pointer group border border-transparent hover:border-yellow-400/50">
     {filmData?.posterUrl && (
       <img
         src={filmData.posterUrl}
         alt={filmName}
-        className="w-10 h-14 object-cover rounded group-hover:ring-2 group-hover:ring-yellow-400 transition-all"
+        className="w-12 h-16 object-cover rounded group-hover:ring-2 group-hover:ring-yellow-400 transition-all duration-200 shadow-md"
       />
     )}
     <div className="flex-1 min-w-0">
-      <p className="text-yellow-400 text-sm font-medium truncate group-hover:text-yellow-300 transition-colors">{filmName}</p>
+      <p className="text-yellow-400 text-sm font-medium truncate group-hover:text-yellow-300 transition-colors duration-200 underline decoration-transparent group-hover:decoration-yellow-400 decoration-2 underline-offset-2">
+        {filmName}
+      </p>
       {filmData && (
-        <p className="text-gray-500 text-xs">{filmData.year} • {filmData.director}</p>
+        <p className="text-gray-500 text-xs group-hover:text-gray-400 transition-colors duration-200">{filmData.year} • {filmData.director}</p>
       )}
     </div>
-    <svg className="w-4 h-4 text-yellow-400 group-hover:text-yellow-300 flex-shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <svg className="w-5 h-5 text-yellow-400 group-hover:text-yellow-300 group-hover:scale-110 flex-shrink-0 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
     </svg>
   </div>
