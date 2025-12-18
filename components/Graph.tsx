@@ -612,4 +612,4 @@ const Graph: React.FC<GraphProps> = ({
   );
 };
 
-export default React.memo(Graph);
+export default Graph;
