@@ -10,17 +10,36 @@
   },
   "dependencies": {
     "csv-parser": "^3.2.0",
+    "focus-trap-react": "^11.0.4",
     "fuse.js": "^7.1.0",
+    "hammerjs": "^2.0.8",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-force-graph-3d": "^1.29.0",
-    "three": "^0.182.0"
+    "react-intersection-observer": "^10.0.0",
+    "react-swipeable": "^7.0.2",
+    "three": "^0.182.0",
+    "workbox-webpack-plugin": "^7.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@axe-core/react": "^4.11.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/axe-core": "^2.0.2",
+    "@types/hammerjs": "^2.0.46",
+    "@types/node": "^22.19.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@types/react-swipeable": "^4.3.0",
+    "@types/three": "^0.182.0",
+    "@types/workbox-webpack-plugin": "^5.1.8",
     "@vitejs/plugin-react": "^5.0.0",
+    "axe-core": "^4.11.0",
     "terser": "^5.44.1",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "vite-plugin-imagemin": "^0.6.1",
+    "vite-plugin-pwa": "^1.2.0"
   }
 }

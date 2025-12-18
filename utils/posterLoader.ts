@@ -30,7 +30,59 @@ class PosterLoader {
     this.loadCacheFromStorage();
   }
 
+  async getSmallPreviewUrl(filmId: string, title: string, year: number): Promise<string | null> {
+    // Try to get cached small preview first
+    const cacheKey = `small_${filmId}`;
+    const cached = this.cache[cacheKey];
+    if (cached && Date.now() < cached.expires) {
+      return cached.url;
+    }
+
+    // Try to load from local small previews in public directory
+    const possibleSmallUrls = this.getLocalSmallPreviewUrls(filmId, title);
+    for (const smallUrl of possibleSmallUrls) {
+      try {
+        const response = await fetch(smallUrl);
+        if (response.ok) {
+          console.log(`Using local small preview for ${title}:`, smallUrl);
+          this.cache[cacheKey] = {
+            url: smallUrl,
+            timestamp: Date.now(),
+            expires: Date.now() + PosterLoader.CACHE_DURATION
+          };
+          this.saveCacheToStorage();
+          return smallUrl;
+        }
+      } catch (error) {
+        // Continue to next possible URL
+      }
+    }
+
+    // Generate small preview from full poster URL
+    const posterUrl = await this.getPosterUrl(filmId, title, year);
+    if (posterUrl && posterUrl.includes('tmdb.org')) {
+      // Convert TMDB URL to small preview size (w92)
+      const smallUrl = posterUrl.replace(/\/w\d+\//, '/w92/');
+      this.cache[cacheKey] = {
+        url: smallUrl,
+        timestamp: Date.now(),
+        expires: Date.now() + PosterLoader.CACHE_DURATION
+      };
+      this.saveCacheToStorage();
+      return smallUrl;
+    }
+    
+    return null;
+  }
+
   async getThumbnailUrl(filmId: string, title: string, year: number): Promise<string | null> {
+    // Try to get cached thumbnail first
+    const cacheKey = `thumb_${filmId}`;
+    const cached = this.cache[cacheKey];
+    if (cached && Date.now() < cached.expires) {
+      return cached.url;
+    }
+
     // Try to load from local thumbnails in public directory
     const possibleThumbUrls = this.getLocalThumbnailUrls(filmId, title);
     for (const thumbUrl of possibleThumbUrls) {
@@ -38,6 +90,12 @@ class PosterLoader {
         const response = await fetch(thumbUrl);
         if (response.ok) {
           console.log(`Using local thumbnail for ${title}:`, thumbUrl);
+          this.cache[cacheKey] = {
+            url: thumbUrl,
+            timestamp: Date.now(),
+            expires: Date.now() + PosterLoader.CACHE_DURATION
+          };
+          this.saveCacheToStorage();
           return thumbUrl;
         }
       } catch (error) {
@@ -45,9 +103,23 @@ class PosterLoader {
       }
     }
 
-    // No thumbnail available
+    // Generate thumbnail from full poster URL
+    const posterUrl = await this.getPosterUrl(filmId, title, year);
+    if (posterUrl && posterUrl.includes('tmdb.org')) {
+      // Convert TMDB URL to thumbnail size (w200)
+      const thumbnailUrl = posterUrl.replace(/\/w\d+\//, '/w200/');
+      this.cache[cacheKey] = {
+        url: thumbnailUrl,
+        timestamp: Date.now(),
+        expires: Date.now() + PosterLoader.CACHE_DURATION
+      };
+      this.saveCacheToStorage();
+      return thumbnailUrl;
+    }
+    
     return null;
   }
+
 
   async getPosterUrl(filmId: string, title: string, year: number): Promise<string> {
     // Check memory cache first
@@ -206,6 +278,20 @@ class PosterLoader {
     // Thumbnails are served from the public directory
     return possibleThumbNames.map(name => `/${name}`);
   }
+  private getLocalSmallPreviewUrls(filmId: string, title: string): string[] {
+    // Try to find small preview in small directory
+    const possibleSmallNames = [
+      `small/${filmId}_small.jpg`,
+      `small/${filmId.replace(/-/g, '_')}_small.jpg`, // Convert hyphens to underscores
+      `small/${title.toLowerCase().replace(/[^a-z0-9]/g, '-')}_small.jpg`,
+      `small/${title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '-')}_small.jpg`,
+      `small/${title.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, '_')}_small.jpg` // Underscore version
+    ];
+
+    // Small previews are served from the public directory
+    return possibleSmallNames.map(name => `/${name}`);
+  }
+
 
   private loadCacheFromStorage(): void {
     try {

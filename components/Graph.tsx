@@ -149,21 +149,7 @@ const Graph: React.FC<GraphProps> = ({
   // Theme-based particle systems for links
   const themeParticlesRef = useRef<Map<string, THREE.Points>>(new Map());
 
-  // Poster preloading system
-  const preloadedPostersRef = useRef<Set<string>>(new Set());
-
-  // Preload posters for visible nodes
-  const preloadPosters = useCallback((nodes: any[]) => {
-    nodes.forEach(node => {
-      if (!preloadedPostersRef.current.has(node.id)) {
-        const img = new Image();
-        img.src = `/posters/${node.id}.jpg`;
-        preloadedPostersRef.current.add(node.id);
-      }
-    });
-  }, []);
-
-  // Poster preloading system
+  // Poster loading now uses distance-based LOD system
   const createThemeParticles = useCallback((link: any) => {
     const sourceNode = typeof link.source === 'object' ? link.source : data.nodes?.find(n => n.id === link.source);
     const targetNode = typeof link.target === 'object' ? link.target : data.nodes?.find(n => n.id === link.target);
@@ -290,29 +276,6 @@ const Graph: React.FC<GraphProps> = ({
     return () => cancelAnimationFrame(animationFrame);
   }, []);
 
-  // Poster preloading when data changes
-  useEffect(() => {
-    if (data.nodes && showPosters) {
-      // Preload posters for all nodes (they're small files, so preload all)
-      preloadPosters(data.nodes);
-    }
-  }, [data.nodes, showPosters, preloadPosters]);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Graph component mounted');
-    console.log('Graph data received:', {
-      nodes: data.nodes?.length || 0,
-      links: data.links?.length || 0,
-      viewMode,
-      showPosters,
-      posterScale,
-      lineOpacity,
-      dataKeys: Object.keys(data),
-      hasNodes: Boolean(data.nodes),
-      hasLinks: Boolean(data.links)
-    });
-  }, [data, viewMode, showPosters, posterScale, lineOpacity]);
 
   // Re-heat simulation when view mode changes
   useEffect(() => {
@@ -420,11 +383,11 @@ const Graph: React.FC<GraphProps> = ({
     }
 
     if (showPosters) {
-        return createPosterNode(node as NodeData, isDimmed, posterScale);
+        return createPosterNode(node as NodeData, isDimmed, posterScale, graphRef.current?.camera?.position);
     } else {
         return createGeometryNode(node as NodeData, isDimmed);
     }
-  }, [highlightedCategory, showPosters, selectedNode, neighbors, posterScale]);
+  }, [highlightedCategory, showPosters, selectedNode, neighbors, posterScale, graphRef]);
 
   // Only render ForceGraph3D when we have actual data to prevent Three.js errors
   if (!data || !data.nodes || data.nodes.length === 0) {
@@ -649,4 +612,4 @@ const Graph: React.FC<GraphProps> = ({
   );
 };
 
-export default Graph;
+export default React.memo(Graph);

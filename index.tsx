@@ -6,6 +6,7 @@ import { NodeData, Scene, SceneInfluence, InfluenceType, hasSceneData, getEnrich
 import { GestureTutorial } from "./components/GestureTutorial";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
+import { useGraphData } from "./hooks/useGraphData";
 
 const Graph = lazy(() => import("./components/Graph"));
 
@@ -1090,32 +1091,12 @@ const TimelineAxis = ({ viewMode }: { viewMode: '3d' | '2d' | 'timeline' }) => {
 
 const AppContent = () => {
   const { currentTheme, setThemeByFilm } = useTheme();
+  const { viewMode, setViewMode, showPosters, setShowPosters, showLegend, setShowLegend, posterScale, setPosterScale, lineOpacity, setLineOpacity, yearRange, setYearRange, selectedDirectors, setSelectedDirectors, filters, setFilters, highlightedCategory, setHighlightedCategory, selectedNode, setSelectedNode, neighbors, setNeighbors, graphRef, filteredData, applyPreset, resetFilters, resetCamera, onNodeClick } = useGraphData({ setThemeByFilm });
   const [introComplete, setIntroComplete] = useState(false);
   const [showLoading, setShowLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<NodeData[]>([]);
-  const [viewMode, setViewMode] = useState<'3d' | '2d' | 'timeline'>('3d');
-  const [showPosters, setShowPosters] = useState(true);
-  const [showLegend, setShowLegend] = useState(true);
-  const [posterScale, setPosterScale] = useState(1.0);
-  const [lineOpacity, setLineOpacity] = useState(0.3);
-  const [yearRange, setYearRange] = useState<[number, number]>([1940, 2025]);
-  const [selectedDirectors, setSelectedDirectors] = useState<string[]>([]);
-  const [filters, setFilters] = useState({
-    subclouds: [], // Start with no filters to debug
-  });
-  const [highlightedCategory, setHighlightedCategory] = useState<string | null>(null);
-  const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
-  const [neighbors, setNeighbors] = useState<Set<string>>(new Set());
-  const [showGestureTutorial, setShowGestureTutorial] = useState(() => {
-    // Show tutorial on first mobile visit
-    const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent) ||
-                     window.matchMedia('(max-width: 768px)').matches;
-    const hasSeenTutorial = localStorage.getItem('gestureTutorialSeen');
-    return isMobile && !hasSeenTutorial;
-  });
-  const graphRef = useRef<any>(null);
 
   // Animate progress bar during loading (fills 0-100% over 500ms)
   useEffect(() => {
@@ -1177,63 +1158,6 @@ const AppContent = () => {
   }, []);
 
   // Filtered data based on current filters
-  const filteredData = useMemo(() => {
-    console.log('Filtering data with:', {
-      totalNodes: INITIAL_GRAPH_DATA.nodes?.length || 0,
-      totalLinks: INITIAL_GRAPH_DATA.links?.length || 0,
-      filters,
-      yearRange,
-      selectedDirectors
-    });
-
-    let nodes = INITIAL_GRAPH_DATA.nodes || [];
-    let links = INITIAL_GRAPH_DATA.links || [];
-
-    console.log('Initial nodes count:', nodes.length);
-
-    // Filter by year range
-    nodes = nodes.filter(node => {
-      const year = node.year;
-      return year >= yearRange[0] && year <= yearRange[1];
-    });
-    console.log('After year filter:', nodes.length);
-
-    // Filter by directors
-    if (selectedDirectors.length > 0) {
-      nodes = nodes.filter(node => {
-        if (!node.director) return false;
-        return selectedDirectors.some(dir =>
-          node.director!.toLowerCase().includes(dir.toLowerCase())
-        );
-      });
-      console.log('After director filter:', nodes.length);
-    }
-
-    // Filter by subclouds (only if filters are selected)
-    if (filters.subclouds.length > 0) {
-      nodes = nodes.filter(node =>
-        node.subclouds.some(subcloud => filters.subclouds.includes(subcloud))
-      );
-      console.log('After subcloud filter:', nodes.length);
-    } else {
-      console.log('No subcloud filters applied, keeping all nodes');
-    }
-
-    // Update links to only include filtered nodes
-    const nodeIds = new Set(nodes.map(n => n.id));
-    links = links.filter(link => {
-      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
-      return nodeIds.has(sourceId) && nodeIds.has(targetId);
-    });
-
-    console.log('Final filtered data:', {
-      nodes: nodes.length,
-      links: links.length
-    });
-
-    return { nodes, links };
-  }, [filters, yearRange, selectedDirectors]);
 
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -1249,147 +1173,7 @@ const AppContent = () => {
     }
   }, [searchQuery, fuse]);
 
-  const applyPreset = useCallback((preset: string) => {
-    switch (preset) {
-      case 'all':
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors([]);
-        setHighlightedCategory(null);
-        break;
-      case 'kb-influences':
-        // Kill Bill influences - highlight Tarantino's Kill Bill films
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors([]);
-        setHighlightedCategory('kill-bill-core');
-        break;
-      case 'reservoir-dogs':
-        // Highlight Reservoir Dogs specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'pulp-fiction':
-        // Highlight Pulp Fiction specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'jackie-brown':
-        // Highlight Jackie Brown specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'death-proof':
-        // Highlight Death Proof specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'inglourious-basterds':
-        // Highlight Inglourious Basterds specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'django-unchained':
-        // Highlight Django Unchained specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'hateful-eight':
-        // Highlight The Hateful Eight specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'hollywood':
-        // Highlight Hollywood specifically
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors(['Quentin Tarantino']);
-        setHighlightedCategory(null);
-        break;
-      case 'western':
-        setFilters({ subclouds: ['western'] });
-        setHighlightedCategory(null);
-        break;
-      case 'crime':
-        setFilters({ subclouds: ['crime', 'noir', 'neo-noir'] });
-        setHighlightedCategory(null);
-        break;
-      case 'exploitation':
-        setFilters({ subclouds: ['exploitation'] });
-        setHighlightedCategory(null);
-        break;
-      case 'femme':
-        setFilters({ subclouds: ['femme-fatale'] });
-        setHighlightedCategory(null);
-        break;
-      case 'anime':
-        setFilters({ subclouds: ['anime'] });
-        setHighlightedCategory(null);
-        break;
-      case 'hong-kong':
-        setFilters({ subclouds: ['hong-kong-action'] });
-        setHighlightedCategory(null);
-        break;
-      case 'wwii':
-        setFilters({ subclouds: ['wwii'] });
-        setHighlightedCategory(null);
-        break;
-      default:
-        setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-        setYearRange([1940, 2025]);
-        setSelectedDirectors([]);
-        setHighlightedCategory(null);
-    }
-  }, []);
 
-  const resetFilters = useCallback(() => {
-    setFilters({ subclouds: Object.keys(COLOR_PALETTE) });
-    setYearRange([1940, 2025]);
-    setSelectedDirectors([]);
-    setSearchQuery('');
-  }, []);
-
-  const resetCamera = useCallback(() => {
-    // Camera reset logic would be implemented in Graph component
-    window.location.reload(); // Temporary solution
-  }, []);
-
-  const onNodeClick = useCallback((node: NodeData) => {
-    setSelectedNode(node);
-
-    // Set theme based on selected film
-    setThemeByFilm(node.id);
-
-    // Find neighbors
-    const nodeNeighbors = new Set<string>();
-    filteredData.links.forEach(link => {
-      const sourceId = typeof link.source === 'string' ? link.source : link.source.id;
-      const targetId = typeof link.target === 'string' ? link.target : link.target.id;
-
-      if (sourceId === node.id) {
-        nodeNeighbors.add(targetId);
-      } else if (targetId === node.id) {
-        nodeNeighbors.add(sourceId);
-      }
-    });
-
-    setNeighbors(nodeNeighbors);
-    setHighlightedCategory(null); // Clear category highlighting when selecting a node
-  }, [filteredData.links, setThemeByFilm]);
 
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">

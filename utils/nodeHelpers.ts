@@ -40,7 +40,7 @@ export const createGeometryNode = (node: NodeData, isDimmed: boolean = false): T
     return mesh;
 };
 
-export const createPosterNode = (node: NodeData, isDimmed: boolean = false, globalScale: number = 1): THREE.Object3D => {
+export const createPosterNode = (node: NodeData, isDimmed: boolean = false, globalScale: number = 1, cameraPosition?: THREE.Vector3): THREE.Object3D => {
   // SPECIAL HANDLING: Kill Bill nodes are anchors
   const isCenterNode = node.name.toLowerCase().includes('kill bill');
   
@@ -53,6 +53,34 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
   const height = width * 1.5; // 2:3 aspect ratio
 
   const group = new THREE.Group();
+  // Calculate distance from camera for LOD
+  // Calculate distance from camera for LOD
+  const nodePosition = new THREE.Vector3(node.x || 0, node.y || 0, node.z || 0);
+  const distance = cameraPosition ? cameraPosition.distanceTo(nodePosition) : 100;
+  
+  // LOD Resolution Logic - determine what to load
+  let lodLevel = 'full'; // 'full', 'thumbnail', 'small', 'placeholder'
+  let targetResolution = { width: 400, height: 600 };
+  
+  if (distance < 200) {
+    // Near: Full resolution
+    lodLevel = 'full';
+    targetResolution = { width: 400, height: 600 };
+  } else if (distance < 500) {
+    // Medium: Thumbnail resolution
+    lodLevel = 'thumbnail';
+    targetResolution = { width: 200, height: 300 };
+  } else if (distance < 800) {
+    // Far: Small preview
+    lodLevel = 'small';
+    targetResolution = { width: 100, height: 150 };
+  } else {
+    // Beyond 800 units: Use placeholder only
+    lodLevel = 'placeholder';
+    targetResolution = { width: 50, height: 75 };
+  }
+
+
 
   // Opacity & Color
   const opacity = isDimmed ? 0.05 : 1.0; 
@@ -218,16 +246,25 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
   }
 
   // Load poster using the dynamic poster loader
+  // Load poster using the dynamic poster loader with LOD
+  // Load poster using the dynamic poster loader with LOD
   const loadPosterAsync = async () => {
     try {
-      // First, try to use the poster URL from node data if available
-      let posterUrl = node.posterUrl;
-
-      // If no poster URL in node data, try to get one from the loader
-      if (!posterUrl) {
+      let posterUrl = null;
+      
+      // Use LOD level to determine what to load
+      if (lodLevel === 'full') {
         posterUrl = await posterLoader.getPosterUrl(node.id, node.name, node.year);
+      } else if (lodLevel === 'thumbnail') {
+        posterUrl = await posterLoader.getThumbnailUrl(node.id, node.name, node.year);
+      } else if (lodLevel === 'small') {
+        posterUrl = await posterLoader.getSmallPreviewUrl(node.id, node.name, node.year);
+      } else if (lodLevel === 'placeholder') {
+        // Use placeholder only
+        posterUrl = null;
       }
 
+      // Use LOD-determined poster URL
       if (posterUrl) {
         const loader = new THREE.TextureLoader();
         loader.setCrossOrigin('anonymous');
@@ -257,11 +294,11 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
             };
             fadeIn();
 
-            console.log(`Successfully loaded poster for ${node.name}:`, posterUrl);
+            console.log(`Successfully loaded LOD poster for ${node.name} (distance: ${distance.toFixed(0)}, level: ${lodLevel}):`, posterUrl);
           },
           undefined,
           (error) => {
-            console.warn(`Failed to load poster texture for ${node.name}:`, error, posterUrl);
+            console.warn(`Failed to load LOD poster texture for ${node.name}:`, error, posterUrl);
             // Fade in placeholder if poster fails to load
             const fadeIn = () => {
               const currentOpacity = contentMaterial.opacity;
@@ -278,7 +315,7 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
           }
         );
       } else {
-        console.log(`No poster URL available for ${node.name}`);
+        console.log(`Using placeholder for ${node.name} (distance: ${distance.toFixed(0)}, level: ${lodLevel})`);
         // Fade in placeholder immediately
         const fadeIn = () => {
           const currentOpacity = contentMaterial.opacity;
@@ -294,7 +331,7 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
         fadeIn();
       }
     } catch (error) {
-      console.warn(`Failed to get poster URL for ${node.name}:`, error);
+      console.warn(`Failed to load LOD poster for ${node.name}:`, error);
       // Fade in placeholder on error
       const fadeIn = () => {
         const currentOpacity = contentMaterial.opacity;
@@ -310,6 +347,8 @@ export const createPosterNode = (node: NodeData, isDimmed: boolean = false, glob
       fadeIn();
     }
   };
+
+
 
   // Load poster asynchronously
   loadPosterAsync();
