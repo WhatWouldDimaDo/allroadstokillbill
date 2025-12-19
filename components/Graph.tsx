@@ -17,6 +17,9 @@ interface GraphProps {
   neighbors: Set<string>; // IDs of neighbor nodes
   posterScale: number;
   lineOpacity: number;
+  // Path highlighting props
+  currentPath: any | null;
+  pathMode: string;
 }
 
 // TASK-010: INFLUENCE TYPE COLOR MAPPING
@@ -116,7 +119,9 @@ const Graph: React.FC<GraphProps> = ({
   selectedNode,
   neighbors,
   posterScale,
-  lineOpacity
+  lineOpacity,
+  currentPath,
+  pathMode
 }) => {
   const { currentTheme } = useTheme();
 

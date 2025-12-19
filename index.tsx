@@ -2,8 +2,10 @@ import React, { useRef, useState, useMemo, useCallback, useEffect, Suspense, laz
 import { createRoot } from "react-dom/client";
 import Fuse from 'fuse.js';
 import { INITIAL_GRAPH_DATA, COLOR_PALETTE } from "./graphData_final_with_posters";
+import { findShortestPath, PathResult } from "./utils/pathFinder";
 import { NodeData, Scene, SceneInfluence, InfluenceType, hasSceneData, getEnrichmentLevel } from "./types";
 import { GestureTutorial } from "./components/GestureTutorial";
+import PathExplorer from "./components/PathExplorer";
 import { LoadingScreen } from "./components/LoadingScreen";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { useGraphData } from "./hooks/useGraphData";
@@ -1097,6 +1099,12 @@ const AppContent = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<NodeData[]>([]);
+  
+  // Path exploration state
+  const [pathMode, setPathMode] = useState<'browse' | 'select-start' | 'select-end' | 'view-path'>('browse');
+  const [pathStartNode, setPathStartNode] = useState<NodeData | null>(null);
+  const [pathEndNode, setPathEndNode] = useState<NodeData | null>(null);
+  const [currentPath, setCurrentPath] = useState<PathResult | null>(null);
 
   // Animate progress bar during loading (fills 0-100% over 500ms)
   useEffect(() => {
@@ -1189,7 +1197,7 @@ const AppContent = () => {
         {introComplete && (
           <Graph
             data={filteredData}
-            onNodeClick={onNodeClick}
+            onNodeClick={pathMode === 'browse' ? onNodeClick : handlePathNodeClick}
             graphRef={graphRef}
             viewMode={viewMode}
             showPosters={showPosters}
