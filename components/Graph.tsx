@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useRef, useState, useMemo } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GraphData, NodeData } from '../types';
 import { createPosterNode, createGeometryNode } from '../utils/nodeHelpers';
 import { useTheme } from '../contexts/ThemeContext';
@@ -15,6 +15,7 @@ interface GraphProps {
   highlightedCategory: string | null;
   selectedNode: NodeData | null;
   neighbors: Set<string>; // IDs of neighbor nodes
+  showLegend: boolean;
   posterScale: number;
   lineOpacity: number;
   // Path highlighting props

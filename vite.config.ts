@@ -13,7 +13,6 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
         fs: {
-          // Allow serving files from one level up to the project root
           allow: ['.']
         }
       },
@@ -81,7 +80,7 @@ export default defineConfig(({ mode }) => {
         }
       },
       build: {
-        // Enable enhanced bundle splitting
+        // Aggressive bundle splitting to reduce chunk sizes
         rollupOptions: {
           output: {
             manualChunks: (id) => {
@@ -90,43 +89,68 @@ export default defineConfig(({ mode }) => {
                 if (id.includes('react') || id.includes('react-dom')) {
                   return 'react-vendor';
                 }
-                if (id.includes('three') || id.includes('react-force-graph')) {
+                if (id.includes('three')) {
+                  // Split Three.js into smaller chunks
+                  if (id.includes('three/examples') || id.includes('three/addons')) {
+                    return 'three-addons';
+                  }
+                  if (id.includes('three/core') || id.includes('three/src')) {
+                    return 'three-core';
+                  }
                   return 'three-vendor';
+                }
+                if (id.includes('react-force-graph-3d')) {
+                  return 'three-graph';
                 }
                 if (id.includes('fuse.js') || id.includes('hammerjs')) {
                   return 'utils-vendor';
                 }
+                // Group smaller utilities together
+                if (id.includes('focus-trap') || id.includes('react-intersection') || id.includes('react-swipeable')) {
+                  return 'ui-utils';
+                }
                 return 'vendor';
               }
-              // App chunks
-              if (id.includes('graphData_final_with_posters')) {
+              // App chunks - split large files
+              if (id.includes('graphData_enriched') || id.includes('graphData_final')) {
                 return 'graph-data';
               }
-              if (id.includes('components/Graph')) {
+              if (id.includes('components/Graph') || id.includes('Graph.tsx')) {
                 return 'graph-component';
               }
               if (id.includes('components/')) {
                 return 'ui-components';
               }
-              if (id.includes('utils/')) {
+              if (id.includes('utils/') || id.includes('hooks/')) {
                 return 'utils';
+              }
+              if (id.includes('types.ts') || id.includes('themes.ts')) {
+                return 'config';
               }
             },
           },
         },
-        // Optimize chunk sizes
-        chunkSizeWarningLimit: 1000, // Warn if chunks exceed 1000kb
+        // Increase chunk size limit and optimize
+        chunkSizeWarningLimit: 750, // Lower warning threshold
         minify: isProduction ? 'terser' : false,
         terserOptions: isProduction ? {
           compress: {
             drop_console: true,
             drop_debugger: true,
+            pure_funcs: ['console.log', 'console.info', 'console.debug'],
+          },
+          mangle: {
+            safari10: true,
           },
         } : undefined,
-        // Enable source maps for debugging in production
-        sourcemap: !isProduction,
+        // Enable source maps only for development
+        sourcemap: false, // Disable source maps for production to reduce size
         // Optimize CSS
         cssCodeSplit: true,
+        // Optimize assets
+        assetsInlineLimit: 4096, // Inline smaller assets
+        // Reduce bundle size
+        reportCompressedSize: false, // Skip compression reporting to speed up builds
       },
       // Enable gzip compression for assets
       optimizeDeps: {

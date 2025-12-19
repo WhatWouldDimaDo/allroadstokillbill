@@ -1,5 +1,6 @@
 import React, { useRef, useState, useMemo, useCallback, useEffect, Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
+import './index.css';
 import Fuse from 'fuse.js';
 import { INITIAL_GRAPH_DATA, COLOR_PALETTE } from "./graphData_final_with_posters";
 import { findShortestPath, PathResult } from "./utils/pathFinder";
@@ -1105,6 +1106,13 @@ const AppContent = () => {
   const [pathStartNode, setPathStartNode] = useState<NodeData | null>(null);
   const [pathEndNode, setPathEndNode] = useState<NodeData | null>(null);
   const [currentPath, setCurrentPath] = useState<PathResult | null>(null);
+  const [showGestureTutorial, setShowGestureTutorial] = useState(false);
+
+  const handlePathNodeClick = (node: NodeData) => {
+    if (pathMode === 'browse') {
+      onNodeClick(node);
+    }
+  };
 
   // Animate progress bar during loading (fills 0-100% over 500ms)
   useEffect(() => {
